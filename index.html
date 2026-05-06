@@ -88,7 +88,7 @@
     .panel { border: 1px solid var(--border); background: var(--bg); border-radius: 3px; transition: border-color 0.3s ease, box-shadow 0.35s ease; }
     .panel:hover { border-color: var(--border-2); box-shadow: 0 0 0 1px rgba(220,220,220,0.02), 0 8px 32px rgba(0,0,0,0.5); }
     .p-header { border-bottom: 1px solid var(--border); padding: 8px 14px; display: flex; align-items: center; gap: 8px; }
-    .p-label { font-family: var(--font-mono); font-size: 9px; color: var(--soft); letter-spacing: 0.18em; text-transform: uppercase; }
+    .p-label { font-family: var(--font-disp); font-size: 10px; color: var(--soft); letter-spacing: 0.06em; text-transform: lowercase; font-style: italic; text-shadow: 0 0 6px rgba(230,230,230,0.06); animation: labelGlow 4s ease-in-out infinite; transition: transform 0.25s ease, text-shadow 0.25s ease, color 0.25s ease; }
 
     /* PLAYER */
     .player-body { padding: 16px 14px; border-bottom: 1px solid var(--border); }
@@ -157,6 +157,24 @@
 
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes slideUp { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes labelGlow {
+  0%, 100% {
+    text-shadow: 0 0 6px rgba(230,230,230,0.06);
+    color: var(--soft);
+  }
+  50% {
+    text-shadow: 0 0 12px rgba(230,230,230,0.12);
+    color: var(--bright);
+  }
+}
+
+.p-label:hover {
+  transform: translateY(-2px);
+  text-shadow:
+    0 0 10px rgba(230,230,230,0.18),
+    0 0 20px rgba(230,230,230,0.08);
+  color: var(--bright);
+}
 
     /* INTRO OVERLAY */
     .intro-overlay {
@@ -266,9 +284,9 @@ const SITE = {
   gallery: {
     title: "pictures i like lol",
     items: [
-      { image: "images/jacket.jpg", caption: "from the but beautiful collection", number: "01 / 04" },
+      { image: "images/jacket.jpg", caption: "guru guru", number: "01 / 04" },
       { image: "images/piece2.jpg", caption: "mimikyu is my favorite pokemon",         number: "02 / 04" },
-      { image: "images/piece3.jpg", caption: "i love boots",   number: "03 / 04" },
+      { image: "images/piece3.jpg", caption: "greyscale",   number: "03 / 04" },
       { image: "images/piece4.jpg", caption: "lovely ccp boots",        number: "04 / 04" },
     ],
   },
