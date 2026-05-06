@@ -24,6 +24,8 @@
       --font:      'Space Grotesk', 'Inter', system-ui, sans-serif;
       --font-mono: 'JetBrains Mono', 'IBM Plex Mono', 'Courier New', monospace;
       --font-disp: 'Fraunces', 'Space Grotesk', serif;
+
+      --glow-intensity: 0.08;
     }
 
     html, body { height: 100%; background: var(--bg); color: var(--text); }
@@ -88,7 +90,7 @@
     .panel { border: 1px solid var(--border); background: var(--bg); border-radius: 3px; transition: border-color 0.3s ease, box-shadow 0.35s ease; }
     .panel:hover { border-color: var(--border-2); box-shadow: 0 0 0 1px rgba(220,220,220,0.02), 0 8px 32px rgba(0,0,0,0.5); }
     .p-header { border-bottom: 1px solid var(--border); padding: 8px 14px; display: flex; align-items: center; gap: 8px; }
-    .p-label { font-family: var(--font-disp); font-size: 10px; color: var(--soft); letter-spacing: 0.06em; text-transform: lowercase; font-style: italic; text-shadow: 0 0 6px rgba(230,230,230,0.06); animation: labelGlow 4s ease-in-out infinite; transition: transform 0.25s ease, text-shadow 0.25s ease, color 0.25s ease; }
+    .p-label { font-family: var(--font-disp); font-size: 10px; color: var(--soft); letter-spacing: 0.06em; text-transform: lowercase; font-style: italic; text-shadow: 0 0 calc(12px * var(--glow-intensity)) rgba(230,230,230,var(--glow-intensity)); transition: transform 0.25s ease, text-shadow 0.25s ease, color 0.25s ease; }
 
     /* PLAYER */
     .player-body { padding: 16px 14px; border-bottom: 1px solid var(--border); }
@@ -168,13 +170,7 @@
   }
 }
 
-.p-label:hover {
-  transform: translateY(-2px);
-  text-shadow:
-    0 0 10px rgba(230,230,230,0.18),
-    0 0 20px rgba(230,230,230,0.08);
-  color: var(--bright);
-}
+.p-label:hover { transform: translateY(-2px); text-shadow: 0 0 calc(18px * var(--glow-intensity)) rgba(230,230,230,var(--glow-intensity)), 0 0 calc(30px * var(--glow-intensity)) rgba(230,230,230,0.6); color: var(--bright); }
 
     /* INTRO OVERLAY */
     .intro-overlay {
@@ -458,6 +454,15 @@ function initPlayer() {
   window.__playerAudio = audio
   audio.src = tracks[cur].file
   audio.preload = 'metadata'
+  const ctx = new (window.AudioContext || window.webkitAudioContext)()
+const src = ctx.createMediaElementSource(audio)
+const analyser = ctx.createAnalyser()
+
+src.connect(analyser)
+analyser.connect(ctx.destination)
+
+analyser.fftSize = 64
+const dataArray = new Uint8Array(analyser.frequencyBinCount)
 
   const saved = parseFloat(localStorage.getItem(VOL_KEY) || '0.5')
   audio.volume = saved
@@ -506,7 +511,10 @@ function initPlayer() {
     ps.value = p; pf.style.width = (p*100)+'%'
   })
 
-  bpl.addEventListener('click', toggle)
+  bpl.addEventListener('click', async () => {
+  if (ctx.state === 'suspended') await ctx.resume()
+  toggle()
+})
   bs.addEventListener('click', () => audio.pause())
   bp.addEventListener('click', () => load((cur-1+tracks.length)%tracks.length, playing))
   bn.addEventListener('click', () => load((cur+1)%tracks.length, playing))
@@ -526,7 +534,27 @@ function initPlayer() {
     if (e.code === 'Space') { e.preventDefault(); toggle() }
     if (e.code === 'ArrowRight') load((cur+1)%tracks.length, playing)
     if (e.code === 'ArrowLeft')  load((cur-1+tracks.length)%tracks.length, playing)
+    
   })
+function animateGlow() {
+  analyser.getByteFrequencyData(dataArray)
+
+  let sum = 0
+  for (let i = 0; i < dataArray.length; i++) sum += dataArray[i]
+  const avg = sum / dataArray.length
+
+  const intensity = avg / 255
+
+  document.documentElement.style.setProperty(
+    '--glow-intensity',
+    (0.05 + intensity * 0.25).toFixed(3)
+  )
+
+  requestAnimationFrame(animateGlow)
+}
+
+animateGlow()
+  
 }
 
 // ── Gallery logic ────────────────────────────────────────────────────
