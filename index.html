@@ -243,7 +243,7 @@ const SITE = {
   user: {
     name:          "spiderfangs",
     handle:        "@midnight_bite_hysteria78341",
-    avatar:        "images/",    // relative path from this file
+    avatar:        "images/avatar.jpg",    // relative path from this file
     status:        "offline",              // online | idle | dnd | offline
     statusVisible: false,
     discordUserId: "1375870716691480767",  // Lanyard: requires joining the Lanyard Discord
@@ -256,7 +256,7 @@ const SITE = {
   music: {
     defaultTrack: 1,
     tracks: [
-      { title: "oh its over",  file: "audio/oh_its_over.mp3"  },
+      { title: "oh its over",  file: "audio/oh its over.mp3"  },
       { title: "twilight",   file: "audio/twilight.mp3"   },
       { title: "1979",  file: "audio/1979.mp3"  },
       { title: "sacrifice", file: "audio/sacrifice.mp3" },
@@ -437,6 +437,7 @@ function initPlayer() {
   let playing = false
 
   const audio = new Audio()
+  window.__playerAudio = audio
   audio.src = tracks[cur].file
   audio.preload = 'metadata'
 
@@ -699,12 +700,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const ov = document.getElementById('intro')
   if (!ov) return
   let dismissed = false
-  const dismiss = () => {
-    if (dismissed) return
-    dismissed = true
-    ov.classList.add('hide')
-    setTimeout(() => { ov.remove() }, 1150)
+const dismiss = () => {
+  if (dismissed) return
+  dismissed = true
+  ov.classList.add('hide')
+
+  // 🎵 START MUSIC HERE
+  const audioEl = window.__playerAudio
+  if (audioEl) {
+    audioEl.play().catch(() => {})
   }
+
+  setTimeout(() => { ov.remove() }, 1150)
+}
   ov.addEventListener('click', dismiss, { once: true })
   setTimeout(dismiss, 1800)
 })()
