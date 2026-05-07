@@ -65,12 +65,7 @@
     .disc-av img.disc-avatar { width: 100%; height: 100%; border-radius: 50%; -o-object-fit: cover; object-fit: cover; display: block; }
     .s-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
     .s-offline { background: #4a4a4a; } .s-online { background: #3ba55c; box-shadow: 0 0 6px rgba(59,165,92,0.4); } .s-idle { background: #faa61a; } .s-dnd { background: #ed4245; }
- .s-name-row {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  min-width: 0;
-}
+    .s-name-row { display: flex; align-items: center; gap: 5px; min-width: 0; }
     .s-name { font-size: 12px; color: var(--bright); font-weight: 500; letter-spacing: 0.005em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
     .s-clan { display: inline-flex; align-items: center; gap: 3px; padding: 1px 4px 1px 3px; border: 1px solid var(--border-2); border-radius: 3px; font-family: var(--font-mono); font-size: 8px; color: var(--soft); letter-spacing: 0.06em; text-transform: uppercase; flex-shrink: 0; background: rgba(255,255,255,0.02); }
     .s-clan img { width: 9px; height: 9px; display: block; border-radius: 1px; }
@@ -80,15 +75,8 @@
     .s-status-text.s-idle { background: transparent; color: #faa61a; }
     .s-status-text.s-dnd { background: transparent; color: #ed4245; }
     .s-status-text.s-offline { background: transparent; color: var(--muted); }
-.s-handle {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  color: var(--muted);
-  margin-top: 2px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+    .s-handle { font-family: var(--font-mono); font-size: 9px; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .status-box > div.s-info { min-width: 0; flex: 1; }
     .act-art { position: relative; width: 52px; height: 52px; flex-shrink: 0; border-radius: 4px; overflow: visible; }
     .act-art > img:first-child { width: 100%; height: 100%; -o-object-fit: cover; object-fit: cover; border-radius: 4px; display: block; background: var(--dim); }
     .act-art-sm { position: absolute; right: -4px; bottom: -4px; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--bg-soft); background: var(--bg-soft); -o-object-fit: cover; object-fit: cover; }
