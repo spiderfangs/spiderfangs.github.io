@@ -454,15 +454,6 @@ function initPlayer() {
   window.__playerAudio = audio
   audio.src = tracks[cur].file
   audio.preload = 'metadata'
-  const ctx = new (window.AudioContext || window.webkitAudioContext)()
-const src = ctx.createMediaElementSource(audio)
-const analyser = ctx.createAnalyser()
-
-src.connect(analyser)
-analyser.connect(ctx.destination)
-
-analyser.fftSize = 64
-const dataArray = new Uint8Array(analyser.frequencyBinCount)
 
   const saved = parseFloat(localStorage.getItem(VOL_KEY) || '0.5')
   audio.volume = saved
@@ -536,25 +527,6 @@ const dataArray = new Uint8Array(analyser.frequencyBinCount)
     if (e.code === 'ArrowLeft')  load((cur-1+tracks.length)%tracks.length, playing)
     
   })
-function animateGlow() {
-  analyser.getByteFrequencyData(dataArray)
-
-  let sum = 0
-  for (let i = 0; i < dataArray.length; i++) sum += dataArray[i]
-  const avg = sum / dataArray.length
-
-  const intensity = avg / 255
-
-  document.documentElement.style.setProperty(
-    '--glow-intensity',
-    (0.05 + intensity * 0.25).toFixed(3)
-  )
-
-  requestAnimationFrame(animateGlow)
-}
-
-animateGlow()
-  
 }
 
 // ── Gallery logic ────────────────────────────────────────────────────
