@@ -227,22 +227,8 @@
       .sb-avatar { width: 96px; }
     }
 
-    /* ════════════════════════════════════════════════════════════════
-       HER WORLD  ·  princesscore theme toggle
-       ----------------------------------------------------------------
-       The dark grayscale site is the default. Clicking the bunny toggles
-       `.princess-mode` on <body>, which ONLY re-paints CSS variables and a
-       handful of image filters — the layout never moves. A temporary
-       `.theme-transition` class (added/removed by JS) stretches the
-       colour / shadow / filter fade to ~1.2s so the change feels dreamlike
-       rather than instant.  "A dark world becoming warm because of one
-       person."
-       ════════════════════════════════════════════════════════════════ */
-
-    /* 1 ─ Princesscore palette. Same variable NAMES as :root, warm values:
-           dusty pink · rose · ivory · pearl white · soft gold.          */
     body.princess-mode {
-      --bg:        #fbf1f3;   /* ivory / pearl base                     */
+      --bg:        #fbf1f3;   /* ivory / pearl                          */
       --bg-soft:   #fff7f9;   /* pearl-white panels                     */
       --border:    rgba(193, 130, 150, 0.20);
       --border-2:  rgba(193, 130, 150, 0.34);
@@ -250,15 +236,12 @@
       --muted:     #c08aa0;
       --soft:      #a86f84;   /* rose                                   */
       --text:      #75505e;
-      --bright:    #4c303c;   /* deep rose-brown — readable on ivory    */
+      --bright:    #4c303c;   /* rose brown or smt                      */
       --glow:      rgba(255, 198, 220, 0.55);
       --glow-intensity: 0.6;  /* headings glow a little brighter        */
-      --gold:      #d9b779;   /* soft gold accent                       */
+      --gold:      #d9b779;   /* soft gold                              */
     }
 
-    /* 2 ─ The dreamy fade. Applied only WHILE toggling so everyday hover
-           interactions stay snappy. !important overrides the short
-           per-element transitions defined further up.                   */
     body.theme-transition,
     body.theme-transition *,
     body.theme-transition *::before,
@@ -269,8 +252,6 @@
                   filter 1.3s ease, opacity 1.2s ease !important;
     }
 
-    /* 3 ─ Soft pink glow behind ALL content (radial wash + warm vignette).
-           z-index:-1 sits above the body background but below content.   */
     #her-glow {
       position: fixed; inset: 0; z-index: -1; pointer-events: none;
       opacity: 0; transition: opacity 1.3s ease;
@@ -281,9 +262,6 @@
     }
     body.princess-mode #her-glow { opacity: 1; }
 
-    /* 4 ─ Pink tint on the grayscale photography. Originals use
-           grayscale(1); here we keep some colour, warm it via
-           sepia + hue-rotate, and lift the brightness a touch.           */
     body.princess-mode .sb-avatar img,
     body.princess-mode .gal-img-w img,
     body.princess-mode .media-w img,
@@ -301,7 +279,6 @@
       opacity: 1 !important;
     }
 
-    /* 5 ─ Soft rose glow around headings / titles / important elements.  */
     body.princess-mode .p-label,
     body.princess-mode .sb-username,
     body.princess-mode .trk-title,
@@ -318,12 +295,11 @@
                   0 0 28px rgba(255, 180, 205, 0.45);
     }
 
-    /* 6 ─ Re-skin the dark chrome: top piano bar, film grain, accents.   */
     body.princess-mode .piano-bar {
       background-image: repeating-linear-gradient(90deg,
         #f3d9e2 0px, #f3d9e2 10px, #fbeff3 10px, #fbeff3 14px);
     }
-    body.princess-mode::after { opacity: 0.12; }   /* lighten film grain  */
+    body.princess-mode::after { opacity: 0.12; }   /* lighte grain  */
     body.princess-mode .trk-item.active::before,
     body.princess-mode .dot.active,
     body.princess-mode .bars span {
@@ -335,8 +311,6 @@
       box-shadow: 0 0 8px rgba(232, 160, 180, 0.5);
     }
 
-    /* 7 ─ Floating sparkles + hearts layer (populated by JS). Sits above
-           content but never blocks clicks. Hidden until princess mode.   */
     #her-fx {
       position: fixed; inset: 0; z-index: 10000; pointer-events: none;
       overflow: hidden; opacity: 0; transition: opacity 1.2s ease;
@@ -348,7 +322,7 @@
       background: radial-gradient(circle, #ffffff 0%, #ffd9ea 40%, transparent 70%);
       animation: herDrift linear infinite;
     }
-    .her-sparkle::before {            /* the crisp four-point star glint   */
+    .her-sparkle::before {            /* glint   */
       content: ''; position: absolute; inset: 0;
       background:
         linear-gradient(transparent 46%, rgba(255,255,255,0.95) 50%, transparent 54%),
@@ -365,20 +339,20 @@
     .her-heart::before { top: -6px; left: 0; }
     .her-heart::after  { left: -6px; top: 0; }
 
-    @keyframes herDrift {            /* sparkles drift upward + twinkle    */
+    @keyframes herDrift {            /* sparkles    */
       0%      { transform: translate3d(0, 100vh, 0) scale(0.4) rotate(0deg);   opacity: 0; }
       10%     { opacity: 0.9; }
       90%     { opacity: 0.9; }
       100%    { transform: translate3d(0, -10vh, 0) scale(1) rotate(180deg);   opacity: 0; }
     }
-    @keyframes herFloat {            /* hearts rise slowly, gently swaying */
+    @keyframes herFloat {            /* hearts rise */
       0%      { transform: translate3d(0, 100vh, 0) rotate(45deg) scale(0.7);  opacity: 0; }
       12%     { opacity: 0.5; }
       88%     { opacity: 0.5; }
       100%    { transform: translate3d(0, -10vh, 0) rotate(45deg) scale(1);    opacity: 0; }
     }
 
-    /* 8 ─ The bunny toggle — subtle in the corner, brightens on hover.    */
+    /* 8 bunny toggle   */
     #her-bunny {
       position: fixed; right: 16px; bottom: 14px; z-index: 10001;
       width: 34px; height: 34px; display: flex; align-items: center;
@@ -396,7 +370,7 @@
       box-shadow: 0 0 14px rgba(255, 190, 210, 0.5);
     }
 
-    /* 9 ─ Respect reduced-motion + keep the bunny tidy on small screens.  */
+    /* 9 ─ aaaa screen fix  */
     @media (prefers-reduced-motion: reduce) {
       .her-sparkle, .her-heart { animation: none !important; opacity: 0 !important; }
     }
@@ -410,14 +384,9 @@
     <div class="intro-text">lovefool</div>
   </div>
 
-  <!-- HER WORLD layers — soft glow behind everything + floating sparkle/heart
-       field above it. Both are decorative and never capture clicks. JS fills
-       #her-fx with sparkles & hearts. -->
   <div id="her-glow" aria-hidden="true"></div>
   <div id="her-fx" aria-hidden="true"></div>
 
-  <!-- The bunny toggle. Subtle in the corner; it swaps to a crown in her
-       world. JS injects the icon and wires the click. -->
   <button id="her-bunny" type="button" aria-pressed="false" aria-label="Enter her world"></button>
 
   <div class="piano-bar"></div>
@@ -471,7 +440,7 @@ const SITE = {
       { image: "images/piece3.jpg", caption: "greyscale", number: "01 / 04" },
       { image: "images/re4.jpg", caption: "i still love resident evil",         number: "02 / 04" },
       { image: "images/jacket.jpg", caption: "elliott smith",   number: "03 / 04" },
-      { image: "images/kylie.jpg", caption: "kylie bunny bunny kylie <3_<3",        number: "04 / 04" },
+      { image: "images/us.jpg", caption: "us",        number: "04 / 04" },
     ],
   },
   bottomMedia: {
@@ -480,25 +449,12 @@ const SITE = {
   },
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// ░░░░░░░░  HER WORLD — "her world" assets (separate & editable)  ░░░░
-// ═══════════════════════════════════════════════════════════════════
-// Everything princess-mode needs lives here, kept apart from the dark
-// theme above so the two never collide. Her photos belong in  images/her/
-// and her music in  audio/her/  — swap those files freely without ever
-// touching the originals.
-//
-//   swapMusic  : on entering her world, play her playlist     (default ON)
-//   swapImages : also replace the photos with hers            (default OFF —
-//                when off, the original photos simply gain a pink tint,
-//                which is the effect described in the brief)
+// ░░░░░░░░  KYLIEEEEEEE  ░░░░
 
 const HER_WORLD = {
   swapMusic:  true,
   swapImages: false,
 
-  // Her playlist — a softer running order. To use her own songs, drop the
-  // files in audio/her/ and point here, e.g. file: "audio/her/our_song.mp3".
   music: {
     tracks: [
       { title: "willow",     file: "audio/willow.mp3"     },
@@ -509,15 +465,12 @@ const HER_WORLD = {
     ],
   },
 
-  // Her photos — only used when swapImages is true. Put the files in
-  // images/her/ and update these paths. (Missing files fall back to the
-  // ✦ placeholder, so nothing breaks if you haven't added them yet.)
   avatar: "images/her/avatar.jpg",
   gallery: [
-    { image: "images/her/01.jpg", caption: "her world",  number: "01 / 04" },
-    { image: "images/her/02.jpg", caption: "warmth",     number: "02 / 04" },
+    { image: "images/her/01.jpg", caption: "kylieeeeeeeeeeeeeeee",  number: "01 / 04" },
+    { image: "images/her/02.jpg", caption: "bleh",     number: "02 / 04" },
     { image: "images/her/03.jpg", caption: "soft",       number: "03 / 04" },
-    { image: "images/her/04.jpg", caption: "everything", number: "04 / 04" },
+    { image: "images/her/04.jpg", caption: "bunny bunny bunny", number: "04 / 04" },
   ],
   bottomMedia: { src: "images/her/bottom.jpg", label: "her" },
 }
