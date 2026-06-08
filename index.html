@@ -414,10 +414,10 @@ const SITE = {
   user: {
     name:          "lovefool",
     handle:        "@midnight_bite_hysteria7841",
-    avatar:        "images/avatar.jpg",    // relative path from this file
+    avatar:        "images/avatar.jpg",    // path
     status:        "offline",              // online | idle | dnd | offline
     statusVisible: false,
-    discordUserId: "1375870716691480767",  // Lanyard: requires joining the Lanyard Discord
+    discordUserId: "1375870716691480767",  // lanyard
   },
   links: [
     { label: `<svg style="display:block" width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`, url: "https://youtube.com/@ħacks" },
@@ -444,7 +444,7 @@ const SITE = {
     ],
   },
   bottomMedia: {
-    src:   "images/bottom.gif",   // .jpg .gif .mp4 .webm — auto-detected
+    src:   "images/bottom.gif",   // autodetec
     label: "equanimity",
   },
 }
@@ -629,7 +629,7 @@ function buildMain() {
 const VOL_KEY = 'biolink_vol'
 
 function initPlayer() {
-  let tracks = SITE.music.tracks   // mutable: her world can swap the playlist
+  let tracks = SITE.music.tracks   
   let cur = SITE.music.defaultTrack
   let playing = false
 
@@ -703,8 +703,6 @@ function initPlayer() {
     if (idx === cur) toggle(); else load(idx, true)
   })
 
-  // Swap the whole playlist (used by her world). Rebuilds the queue list,
-  // resets to the first track, and keeps playing only if we already were.
   function setPlaylist(newTracks, opts = {}) {
     if (!newTracks || !newTracks.length) return
     const wasPlaying = playing
@@ -733,7 +731,7 @@ function initPlayer() {
 
 // ── Gallery logic ────────────────────────────────────────────────────
 function initGallery() {
-  let items = SITE.gallery.items   // mutable: her world can swap the photos
+  let items = SITE.gallery.items   
   let cur = 0, busy = false
   const img   = document.getElementById('gimg')
   const gnum  = document.getElementById('gnum')
@@ -777,10 +775,6 @@ function initGallery() {
   }
 }
 
-// ── Her world (princesscore toggle) ─────────────────────────────────
-// Builds the bunny toggle + the floating sparkle/heart field, fades the
-// theme between dark and princesscore, swaps the playlist (and, optionally,
-// the photos), and remembers the last choice across visits.
 function initHerWorld() {
   const body  = document.body
   const fx    = document.getElementById('her-fx')
@@ -788,13 +782,11 @@ function initHerWorld() {
   if (!fx || !bunny) return
   const KEY = 'her_world'
 
-  // Two line-icons: a bunny for the dark world, a crown for hers.
+  // bunny from dark crown from pink
   const BUNNY = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="9" cy="6.5" rx="1.8" ry="4.3"/><ellipse cx="15" cy="6.5" rx="1.8" ry="4.3"/><circle cx="12" cy="15.5" r="5.6"/><circle cx="10.2" cy="14.6" r=".5" fill="currentColor" stroke="none"/><circle cx="13.8" cy="14.6" r=".5" fill="currentColor" stroke="none"/><path d="M11 17c.6.5 1.4.5 2 0"/></svg>`
   const CROWN = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17.5h16M4 17.5 2.6 8l4.4 3.2L12 5l5 6.2 4.4-3.2L20 17.5"/><circle cx="2.6" cy="8" r="1" fill="currentColor" stroke="none"/><circle cx="21.4" cy="8" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="5" r="1" fill="currentColor" stroke="none"/></svg>`
 
-  // ── 1. Build the floating field once. Pure CSS animations drive it, so
-  //       it costs almost nothing while running. Randomised position,
-  //       size, speed and a negative delay (so they're already mid-flight).
+  // ── build at start ez optimization w me 
   const rnd = (a, b) => a + Math.random() * (b - a)
   for (let i = 0; i < 16; i++) {
     const s = document.createElement('div'); s.className = 'her-sparkle'
@@ -808,7 +800,7 @@ function initHerWorld() {
     fx.appendChild(h)
   }
 
-  // ── 2. Optional photo swap (off by default — see HER_WORLD.swapImages).
+  // grah grah boom
   function swapImages(on) {
     const av = document.querySelector('.sb-avatar img')
     if (av) av.src = on ? HER_WORLD.avatar : SITE.user.avatar
@@ -817,13 +809,11 @@ function initHerWorld() {
     if (bm) bm.src = on ? HER_WORLD.bottomMedia.src : SITE.bottomMedia.src
   }
 
-  // ── 3. Apply or revert the whole theme.
+  // revert or apply
   let on = false
   function apply(next, animate) {
     on = next
     if (animate) {
-      // Stretch every colour/shadow/filter fade to ~1.2s, then release the
-      // class so ordinary hover transitions stay snappy.
       body.classList.add('theme-transition')
       setTimeout(() => body.classList.remove('theme-transition'), 1500)
     }
@@ -832,8 +822,6 @@ function initHerWorld() {
     bunny.setAttribute('aria-pressed', String(on))
     bunny.setAttribute('aria-label', on ? 'Return to the dark world' : 'Enter her world')
 
-    // Swap music only when asked; keep playing only if we already were
-    // (so this never force-starts audio on its own).
     if (HER_WORLD.swapMusic && window.__player)
       window.__player.setPlaylist(on ? HER_WORLD.music.tracks : SITE.music.tracks, { autoplay: animate })
     if (HER_WORLD.swapImages) swapImages(on)
@@ -844,19 +832,18 @@ function initHerWorld() {
   bunny.innerHTML = BUNNY
   bunny.addEventListener('click', () => apply(!on, true))
 
-  // ── 4. Restore the last visit's choice — no animation, no music restart.
   let saved = '0'; try { saved = localStorage.getItem(KEY) || '0' } catch (e) {}
   if (saved === '1') apply(true, false)
 }
 
-// ── Boot ─────────────────────────────────────────────────────────────
+// ── boot ─────────────────────────────────────────────────────────────
 buildSidebar()
 buildMain()
 initPlayer()
 initGallery()
 initHerWorld()
 
-// ── Discord presence (Lanyard) ──────────────────────────────────────
+// ── lanyard shit ──────────────────────────────────────
 console.log("Lanyard script running")
 
 const ACT_TYPE_LABELS = { 0: 'Playing', 1: 'Streaming', 2: 'Listening to', 3: 'Watching' }
@@ -1001,7 +988,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setInterval(fetchDiscordPresence, 15000)
 })
 
-// ── Intro overlay (non-blocking) ────────────────────────────────────
+// ── overlay ────────────────────────────────────
 ;(function initIntro() {
   const ov = document.getElementById('intro')
   if (!ov) return
@@ -1011,7 +998,7 @@ const dismiss = () => {
   dismissed = true
   ov.classList.add('hide')
 
-  // 🎵 START MUSIC HERE
+  // msuciccccc
   const audioEl = window.__playerAudio
   if (audioEl) {
     audioEl.play().catch(() => {})
