@@ -226,12 +226,200 @@
       .sidebar { width: 100%; position: static; }
       .sb-avatar { width: 96px; }
     }
+
+    /* ════════════════════════════════════════════════════════════════
+       HER WORLD  ·  princesscore theme toggle
+       ----------------------------------------------------------------
+       The dark grayscale site is the default. Clicking the bunny toggles
+       `.princess-mode` on <body>, which ONLY re-paints CSS variables and a
+       handful of image filters — the layout never moves. A temporary
+       `.theme-transition` class (added/removed by JS) stretches the
+       colour / shadow / filter fade to ~1.2s so the change feels dreamlike
+       rather than instant.  "A dark world becoming warm because of one
+       person."
+       ════════════════════════════════════════════════════════════════ */
+
+    /* 1 ─ Princesscore palette. Same variable NAMES as :root, warm values:
+           dusty pink · rose · ivory · pearl white · soft gold.          */
+    body.princess-mode {
+      --bg:        #fbf1f3;   /* ivory / pearl base                     */
+      --bg-soft:   #fff7f9;   /* pearl-white panels                     */
+      --border:    rgba(193, 130, 150, 0.20);
+      --border-2:  rgba(193, 130, 150, 0.34);
+      --dim:       #ecccd6;   /* dusty pink                             */
+      --muted:     #c08aa0;
+      --soft:      #a86f84;   /* rose                                   */
+      --text:      #75505e;
+      --bright:    #4c303c;   /* deep rose-brown — readable on ivory    */
+      --glow:      rgba(255, 198, 220, 0.55);
+      --glow-intensity: 0.6;  /* headings glow a little brighter        */
+      --gold:      #d9b779;   /* soft gold accent                       */
+    }
+
+    /* 2 ─ The dreamy fade. Applied only WHILE toggling so everyday hover
+           interactions stay snappy. !important overrides the short
+           per-element transitions defined further up.                   */
+    body.theme-transition,
+    body.theme-transition *,
+    body.theme-transition *::before,
+    body.theme-transition *::after {
+      transition: background 1.2s ease, background-color 1.2s ease,
+                  color 1.2s ease, border-color 1.2s ease,
+                  box-shadow 1.2s ease, fill 1.2s ease,
+                  filter 1.3s ease, opacity 1.2s ease !important;
+    }
+
+    /* 3 ─ Soft pink glow behind ALL content (radial wash + warm vignette).
+           z-index:-1 sits above the body background but below content.   */
+    #her-glow {
+      position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      opacity: 0; transition: opacity 1.3s ease;
+      background:
+        radial-gradient(120% 90% at 50% -10%, rgba(255, 210, 226, 0.55), transparent 60%),
+        radial-gradient(90% 70% at 50% 110%, rgba(255, 226, 196, 0.40), transparent 60%),
+        linear-gradient(180deg, #fde7ee 0%, #fbf1f3 45%, #fff6f3 100%);
+    }
+    body.princess-mode #her-glow { opacity: 1; }
+
+    /* 4 ─ Pink tint on the grayscale photography. Originals use
+           grayscale(1); here we keep some colour, warm it via
+           sepia + hue-rotate, and lift the brightness a touch.           */
+    body.princess-mode .sb-avatar img,
+    body.princess-mode .gal-img-w img,
+    body.princess-mode .media-w img,
+    body.princess-mode .media-w video {
+      filter: grayscale(0.15) sepia(0.45) saturate(1.7) hue-rotate(300deg)
+              brightness(1.12) contrast(0.96) !important;
+      opacity: 0.96 !important;
+    }
+    body.princess-mode .sb-avatar:hover img,
+    body.princess-mode .gal-img-w:hover img,
+    body.princess-mode .media-w:hover img,
+    body.princess-mode .media-w:hover video {
+      filter: grayscale(0) sepia(0.35) saturate(1.8) hue-rotate(300deg)
+              brightness(1.16) contrast(0.98) !important;
+      opacity: 1 !important;
+    }
+
+    /* 5 ─ Soft rose glow around headings / titles / important elements.  */
+    body.princess-mode .p-label,
+    body.princess-mode .sb-username,
+    body.princess-mode .trk-title,
+    body.princess-mode .intro-text {
+      text-shadow: 0 0 14px rgba(255, 170, 200, 0.55),
+                   0 0 28px rgba(255, 190, 150, 0.30);
+    }
+    body.princess-mode .panel:hover {
+      box-shadow: 0 0 0 1px rgba(220, 150, 175, 0.18),
+                  0 10px 36px rgba(220, 140, 170, 0.22);
+    }
+    body.princess-mode .sb-avatar:hover {
+      box-shadow: 0 0 0 1px rgba(220, 150, 175, 0.18),
+                  0 0 28px rgba(255, 180, 205, 0.45);
+    }
+
+    /* 6 ─ Re-skin the dark chrome: top piano bar, film grain, accents.   */
+    body.princess-mode .piano-bar {
+      background-image: repeating-linear-gradient(90deg,
+        #f3d9e2 0px, #f3d9e2 10px, #fbeff3 10px, #fbeff3 14px);
+    }
+    body.princess-mode::after { opacity: 0.12; }   /* lighten film grain  */
+    body.princess-mode .trk-item.active::before,
+    body.princess-mode .dot.active,
+    body.princess-mode .bars span {
+      background: var(--gold) !important;
+      box-shadow: 0 0 10px rgba(217, 183, 121, 0.6) !important;
+    }
+    body.princess-mode .r-fill {
+      background: var(--soft);
+      box-shadow: 0 0 8px rgba(232, 160, 180, 0.5);
+    }
+
+    /* 7 ─ Floating sparkles + hearts layer (populated by JS). Sits above
+           content but never blocks clicks. Hidden until princess mode.   */
+    #her-fx {
+      position: fixed; inset: 0; z-index: 10000; pointer-events: none;
+      overflow: hidden; opacity: 0; transition: opacity 1.2s ease;
+    }
+    body.princess-mode #her-fx { opacity: 1; }
+
+    .her-sparkle, .her-heart { position: absolute; top: 0; will-change: transform, opacity; }
+    .her-sparkle {
+      background: radial-gradient(circle, #ffffff 0%, #ffd9ea 40%, transparent 70%);
+      animation: herDrift linear infinite;
+    }
+    .her-sparkle::before {            /* the crisp four-point star glint   */
+      content: ''; position: absolute; inset: 0;
+      background:
+        linear-gradient(transparent 46%, rgba(255,255,255,0.95) 50%, transparent 54%),
+        linear-gradient(90deg, transparent 46%, rgba(255,255,255,0.95) 50%, transparent 54%);
+    }
+    .her-heart {
+      width: 12px; height: 12px; background: #f5a8c0;
+      animation: herFloat linear infinite;
+    }
+    .her-heart::before, .her-heart::after {
+      content: ''; position: absolute; width: 12px; height: 12px;
+      background: inherit; border-radius: 50%;
+    }
+    .her-heart::before { top: -6px; left: 0; }
+    .her-heart::after  { left: -6px; top: 0; }
+
+    @keyframes herDrift {            /* sparkles drift upward + twinkle    */
+      0%      { transform: translate3d(0, 100vh, 0) scale(0.4) rotate(0deg);   opacity: 0; }
+      10%     { opacity: 0.9; }
+      90%     { opacity: 0.9; }
+      100%    { transform: translate3d(0, -10vh, 0) scale(1) rotate(180deg);   opacity: 0; }
+    }
+    @keyframes herFloat {            /* hearts rise slowly, gently swaying */
+      0%      { transform: translate3d(0, 100vh, 0) rotate(45deg) scale(0.7);  opacity: 0; }
+      12%     { opacity: 0.5; }
+      88%     { opacity: 0.5; }
+      100%    { transform: translate3d(0, -10vh, 0) rotate(45deg) scale(1);    opacity: 0; }
+    }
+
+    /* 8 ─ The bunny toggle — subtle in the corner, brightens on hover.    */
+    #her-bunny {
+      position: fixed; right: 16px; bottom: 14px; z-index: 10001;
+      width: 34px; height: 34px; display: flex; align-items: center;
+      justify-content: center; padding: 0; cursor: pointer;
+      background: transparent; border: 1px solid var(--border);
+      border-radius: 50%; color: var(--muted); opacity: 0.45;
+      transition: opacity .35s ease, color .6s ease, border-color .6s ease,
+                  box-shadow .6s ease, transform .35s ease;
+    }
+    #her-bunny:hover { opacity: 1; transform: translateY(-2px); color: var(--soft); }
+    #her-bunny svg { display: block; }
+    body.princess-mode #her-bunny {
+      opacity: 0.9; color: var(--gold);
+      border-color: rgba(217, 183, 121, 0.5);
+      box-shadow: 0 0 14px rgba(255, 190, 210, 0.5);
+    }
+
+    /* 9 ─ Respect reduced-motion + keep the bunny tidy on small screens.  */
+    @media (prefers-reduced-motion: reduce) {
+      .her-sparkle, .her-heart { animation: none !important; opacity: 0 !important; }
+    }
+    @media (max-width: 700px) {
+      #her-bunny { right: 12px; bottom: 12px; width: 30px; height: 30px; }
+    }
   </style>
 </head>
 <body>
   <div class="intro-overlay" id="intro" role="dialog" aria-label="lovefool">
     <div class="intro-text">lovefool</div>
   </div>
+
+  <!-- HER WORLD layers — soft glow behind everything + floating sparkle/heart
+       field above it. Both are decorative and never capture clicks. JS fills
+       #her-fx with sparkles & hearts. -->
+  <div id="her-glow" aria-hidden="true"></div>
+  <div id="her-fx" aria-hidden="true"></div>
+
+  <!-- The bunny toggle. Subtle in the corner; it swaps to a crown in her
+       world. JS injects the icon and wires the click. -->
+  <button id="her-bunny" type="button" aria-pressed="false" aria-label="Enter her world"></button>
+
   <div class="piano-bar"></div>
   <div class="page-wrap">
     <div class="layout">
@@ -290,6 +478,48 @@ const SITE = {
     src:   "images/bottom.gif",   // .jpg .gif .mp4 .webm — auto-detected
     label: "equanimity",
   },
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// ░░░░░░░░  HER WORLD — "her world" assets (separate & editable)  ░░░░
+// ═══════════════════════════════════════════════════════════════════
+// Everything princess-mode needs lives here, kept apart from the dark
+// theme above so the two never collide. Her photos belong in  images/her/
+// and her music in  audio/her/  — swap those files freely without ever
+// touching the originals.
+//
+//   swapMusic  : on entering her world, play her playlist     (default ON)
+//   swapImages : also replace the photos with hers            (default OFF —
+//                when off, the original photos simply gain a pink tint,
+//                which is the effect described in the brief)
+
+const HER_WORLD = {
+  swapMusic:  true,
+  swapImages: false,
+
+  // Her playlist — a softer running order. To use her own songs, drop the
+  // files in audio/her/ and point here, e.g. file: "audio/her/our_song.mp3".
+  music: {
+    tracks: [
+      { title: "willow",     file: "audio/willow.mp3"     },
+      { title: "1979",       file: "audio/1979.mp3"       },
+      { title: "twilight",   file: "audio/twilight.mp3"   },
+      { title: "lucid",      file: "audio/lucid.mp3"      },
+      { title: "lets laugh", file: "audio/lets_laugh.mp3" },
+    ],
+  },
+
+  // Her photos — only used when swapImages is true. Put the files in
+  // images/her/ and update these paths. (Missing files fall back to the
+  // ✦ placeholder, so nothing breaks if you haven't added them yet.)
+  avatar: "images/her/avatar.jpg",
+  gallery: [
+    { image: "images/her/01.jpg", caption: "her world",  number: "01 / 04" },
+    { image: "images/her/02.jpg", caption: "warmth",     number: "02 / 04" },
+    { image: "images/her/03.jpg", caption: "soft",       number: "03 / 04" },
+    { image: "images/her/04.jpg", caption: "everything", number: "04 / 04" },
+  ],
+  bottomMedia: { src: "images/her/bottom.jpg", label: "her" },
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -446,7 +676,7 @@ function buildMain() {
 const VOL_KEY = 'biolink_vol'
 
 function initPlayer() {
-  const tracks = SITE.music.tracks
+  let tracks = SITE.music.tracks   // mutable: her world can swap the playlist
   let cur = SITE.music.defaultTrack
   let playing = false
 
@@ -520,6 +750,25 @@ function initPlayer() {
     if (idx === cur) toggle(); else load(idx, true)
   })
 
+  // Swap the whole playlist (used by her world). Rebuilds the queue list,
+  // resets to the first track, and keeps playing only if we already were.
+  function setPlaylist(newTracks, opts = {}) {
+    if (!newTracks || !newTracks.length) return
+    const wasPlaying = playing
+    tracks = newTracks
+    cur = 0
+    tlist.innerHTML = tracks.map((t, i) => `
+      <div class="trk-item${i===cur?' active':''}" data-idx="${i}">
+        <span class="trk-num">${i+1}</span>
+        <span class="trk-name">${t.title}</span>
+        ${i===cur?'<div class="bars"><span></span><span></span><span></span></div>':''}
+      </div>`).join('')
+    audio.src = tracks[cur].file; audio.load()
+    tit.textContent = tracks[cur].title
+    if (opts.autoplay && wasPlaying) audio.play().then(()=>{playing=true;setIcon()}).catch(()=>{})
+  }
+  window.__player = { setPlaylist }
+
   document.addEventListener('keydown', e => {
     if (e.target !== document.body) return
     if (e.code === 'Space') { e.preventDefault(); toggle() }
@@ -531,9 +780,8 @@ function initPlayer() {
 
 // ── Gallery logic ────────────────────────────────────────────────────
 function initGallery() {
-  const items = SITE.gallery.items
+  let items = SITE.gallery.items   // mutable: her world can swap the photos
   let cur = 0, busy = false
-
   const img   = document.getElementById('gimg')
   const gnum  = document.getElementById('gnum')
   const gcap  = document.getElementById('gcap')
@@ -560,6 +808,92 @@ function initGallery() {
   gnext.addEventListener('click', () => goTo(cur+1))
   gdots.addEventListener('click', e => { const d=e.target.closest('.dot'); if(d) goTo(parseInt(d.dataset.idx)) })
   setInterval(() => goTo(cur+1), 6000)
+
+  // Swap the gallery photos (used by her world when swapImages is on).
+  window.__gallery = {
+    setItems(newItems) {
+      if (!newItems || !newItems.length) return
+      items = newItems; cur = 0; busy = false
+      img.style.display = ''
+      img.src = items[0].image
+      gnum.textContent = items[0].number
+      gcap.textContent = items[0].caption
+      gdots.innerHTML = items.map((_, i) =>
+        `<button class="dot${i===0?' active':''}" data-idx="${i}" aria-label="Slide ${i+1}"></button>`).join('')
+    }
+  }
+}
+
+// ── Her world (princesscore toggle) ─────────────────────────────────
+// Builds the bunny toggle + the floating sparkle/heart field, fades the
+// theme between dark and princesscore, swaps the playlist (and, optionally,
+// the photos), and remembers the last choice across visits.
+function initHerWorld() {
+  const body  = document.body
+  const fx    = document.getElementById('her-fx')
+  const bunny = document.getElementById('her-bunny')
+  if (!fx || !bunny) return
+  const KEY = 'her_world'
+
+  // Two line-icons: a bunny for the dark world, a crown for hers.
+  const BUNNY = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="9" cy="6.5" rx="1.8" ry="4.3"/><ellipse cx="15" cy="6.5" rx="1.8" ry="4.3"/><circle cx="12" cy="15.5" r="5.6"/><circle cx="10.2" cy="14.6" r=".5" fill="currentColor" stroke="none"/><circle cx="13.8" cy="14.6" r=".5" fill="currentColor" stroke="none"/><path d="M11 17c.6.5 1.4.5 2 0"/></svg>`
+  const CROWN = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17.5h16M4 17.5 2.6 8l4.4 3.2L12 5l5 6.2 4.4-3.2L20 17.5"/><circle cx="2.6" cy="8" r="1" fill="currentColor" stroke="none"/><circle cx="21.4" cy="8" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="5" r="1" fill="currentColor" stroke="none"/></svg>`
+
+  // ── 1. Build the floating field once. Pure CSS animations drive it, so
+  //       it costs almost nothing while running. Randomised position,
+  //       size, speed and a negative delay (so they're already mid-flight).
+  const rnd = (a, b) => a + Math.random() * (b - a)
+  for (let i = 0; i < 16; i++) {
+    const s = document.createElement('div'); s.className = 'her-sparkle'
+    const sz = rnd(4, 11)
+    s.style.cssText = `left:${rnd(0,100)}%;width:${sz}px;height:${sz}px;animation-duration:${rnd(7,15)}s;animation-delay:${-rnd(0,15)}s`
+    fx.appendChild(s)
+  }
+  for (let i = 0; i < 7; i++) {
+    const h = document.createElement('div'); h.className = 'her-heart'
+    h.style.cssText = `left:${rnd(2,96)}%;animation-duration:${rnd(12,22)}s;animation-delay:${-rnd(0,18)}s`
+    fx.appendChild(h)
+  }
+
+  // ── 2. Optional photo swap (off by default — see HER_WORLD.swapImages).
+  function swapImages(on) {
+    const av = document.querySelector('.sb-avatar img')
+    if (av) av.src = on ? HER_WORLD.avatar : SITE.user.avatar
+    if (window.__gallery) window.__gallery.setItems(on ? HER_WORLD.gallery : SITE.gallery.items)
+    const bm = document.querySelector('.media-w img')
+    if (bm) bm.src = on ? HER_WORLD.bottomMedia.src : SITE.bottomMedia.src
+  }
+
+  // ── 3. Apply or revert the whole theme.
+  let on = false
+  function apply(next, animate) {
+    on = next
+    if (animate) {
+      // Stretch every colour/shadow/filter fade to ~1.2s, then release the
+      // class so ordinary hover transitions stay snappy.
+      body.classList.add('theme-transition')
+      setTimeout(() => body.classList.remove('theme-transition'), 1500)
+    }
+    body.classList.toggle('princess-mode', on)
+    bunny.innerHTML = on ? CROWN : BUNNY
+    bunny.setAttribute('aria-pressed', String(on))
+    bunny.setAttribute('aria-label', on ? 'Return to the dark world' : 'Enter her world')
+
+    // Swap music only when asked; keep playing only if we already were
+    // (so this never force-starts audio on its own).
+    if (HER_WORLD.swapMusic && window.__player)
+      window.__player.setPlaylist(on ? HER_WORLD.music.tracks : SITE.music.tracks, { autoplay: animate })
+    if (HER_WORLD.swapImages) swapImages(on)
+
+    try { localStorage.setItem(KEY, on ? '1' : '0') } catch (e) {}
+  }
+
+  bunny.innerHTML = BUNNY
+  bunny.addEventListener('click', () => apply(!on, true))
+
+  // ── 4. Restore the last visit's choice — no animation, no music restart.
+  let saved = '0'; try { saved = localStorage.getItem(KEY) || '0' } catch (e) {}
+  if (saved === '1') apply(true, false)
 }
 
 // ── Boot ─────────────────────────────────────────────────────────────
@@ -567,6 +901,7 @@ buildSidebar()
 buildMain()
 initPlayer()
 initGallery()
+initHerWorld()
 
 // ── Discord presence (Lanyard) ──────────────────────────────────────
 console.log("Lanyard script running")

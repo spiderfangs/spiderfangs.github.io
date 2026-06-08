@@ -1,3 +1,11 @@
 [build]
-  command = "npm run build"
-  publish = "dist"
+  # This is a static HTML/CSS/JS site served directly from the repository
+  # root. There is no Node build step, so we use a no-op command and the
+  # publish directory is the repo root itself.
+  #
+  # An explicit `command` is required here because the Netlify UI has a
+  # build command (`npm run build`) configured. There is no package.json in
+  # this repo, so that command fails with ENOENT. Defining `command` in
+  # netlify.toml overrides the UI setting, so this no-op runs instead.
+  command = "echo 'No build step required for this static site'"
+  publish = "."
