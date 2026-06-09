@@ -455,6 +455,13 @@ const HER_WORLD = {
   swapMusic:  true,
   swapImages: true,
 
+  discordUserId: "855097872458055680",  // lanyard — her account
+
+  name:         "kylie",              // text above the avatar in her world
+  about:        "her world",          // about text shown in her world
+  galleryTitle: "pictures she likes", // replaces "pictures i like lol" heading
+  hideLinks:    true,                 // hide the links section in her world
+
   music: {
     tracks: [
       { title: "mascara",     file: "audio/her/mascara.mp3"     },
@@ -472,7 +479,7 @@ const HER_WORLD = {
     { image: "images/her/03.jpg", caption: "orchids",       number: "03 / 04" },
     { image: "images/her/04.jpg", caption: "i love lilies of the valley", number: "04 / 04" },
   ],
-  bottomMedia: { src: "images/her/bottom.jpg", label: "her" },
+  bottomMedia: { src: "images/her/bottom.jpg", label: "her" },  // label replaces "equanimity"
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -518,7 +525,7 @@ function buildSidebar() {
     </div>
     <div id="discord-activity"></div>
     ${links.length ? `
-      <div>
+      <div id="links-section">
         <div class="section-lbl">links</div>
         <div class="links-row">
           ${links.map(l => `<a class="link-btn" href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join('')}
@@ -588,7 +595,7 @@ function buildMain() {
 
     <!-- GALLERY -->
     <div class="panel">
-      <div class="p-header"><span class="p-label">${gTitle}</span></div>
+      <div class="p-header"><span class="p-label" id="gal-title">${gTitle}</span></div>
       <div class="gal-body">
         <div class="gal-img-w">
           <img id="gimg" src="${gItems[0].image}" alt="${gItems[0].caption}"
@@ -614,7 +621,7 @@ function buildMain() {
 
     <!-- BOTTOM MEDIA -->
     <div class="panel">
-      <div class="p-header"><span class="p-label">${bLabel}</span></div>
+      <div class="p-header"><span class="p-label" id="bottom-label">${bLabel}</span></div>
       <div class="media-w">
         ${isVid
           ? `<video src="${bSrc}" autoplay loop muted playsinline></video>`
@@ -685,10 +692,7 @@ function initPlayer() {
     ps.value = p; pf.style.width = (p*100)+'%'
   })
 
-  bpl.addEventListener('click', async () => {
-  if (ctx.state === 'suspended') await ctx.resume()
-  toggle()
-})
+  bpl.addEventListener('click', () => { toggle() })
   bs.addEventListener('click', () => audio.pause())
   bp.addEventListener('click', () => load((cur-1+tracks.length)%tracks.length, playing))
   bn.addEventListener('click', () => load((cur+1)%tracks.length, playing))
@@ -714,9 +718,16 @@ function initPlayer() {
         <span class="trk-name">${t.title}</span>
         ${i===cur?'<div class="bars"><span></span><span></span><span></span></div>':''}
       </div>`).join('')
-    audio.src = tracks[cur].file; audio.load()
+    audio.src = tracks[cur].file
+    audio.preload = 'auto'   // eagerly fetch the file so it can play without a prior visit
+    audio.load()
     tit.textContent = tracks[cur].title
-    if (opts.autoplay && wasPlaying) audio.play().then(()=>{playing=true;setIcon()}).catch(()=>{})
+    // Play when entering her world (force) or when carrying over active playback.
+    if (opts.autoplay && (opts.force || wasPlaying)) {
+      const tryPlay = () => audio.play().then(()=>{playing=true;setIcon()}).catch(()=>{})
+      if (audio.readyState >= 2) tryPlay()
+      else audio.addEventListener('canplay', tryPlay, { once: true })
+    }
   }
   window.__player = { setPlaylist }
 
@@ -809,6 +820,20 @@ function initHerWorld() {
     if (bm) bm.src = on ? HER_WORLD.bottomMedia.src : SITE.bottomMedia.src
   }
 
+  // swap the text content (username, about, headings, links) for her world
+  function swapContent(on) {
+    const uname = document.querySelector('.sb-username')
+    if (uname) uname.textContent = on ? HER_WORLD.name : SITE.user.name
+    const about = document.querySelector('.about-txt')
+    if (about) about.textContent = on ? HER_WORLD.about : SITE.about
+    const galTitle = document.getElementById('gal-title')
+    if (galTitle) galTitle.textContent = on ? HER_WORLD.galleryTitle : SITE.gallery.title
+    const bLabel = document.getElementById('bottom-label')
+    if (bLabel) bLabel.textContent = on ? HER_WORLD.bottomMedia.label : SITE.bottomMedia.label
+    const linksSection = document.getElementById('links-section')
+    if (linksSection) linksSection.style.display = (on && HER_WORLD.hideLinks) ? 'none' : ''
+  }
+
   // revert or apply
   let on = false
   function apply(next, animate) {
@@ -823,8 +848,12 @@ function initHerWorld() {
     bunny.setAttribute('aria-label', on ? 'Return to the dark world' : 'Enter her world')
 
     if (HER_WORLD.swapMusic && window.__player)
-      window.__player.setPlaylist(on ? HER_WORLD.music.tracks : SITE.music.tracks, { autoplay: animate })
+      window.__player.setPlaylist(on ? HER_WORLD.music.tracks : SITE.music.tracks, { autoplay: animate, force: on && animate })
     if (HER_WORLD.swapImages) swapImages(on)
+    swapContent(on)
+
+    // Point the Lanyard widget at her account in her world, his otherwise.
+    setDiscordPresenceId(on ? HER_WORLD.discordUserId : SITE.user.discordUserId)
 
     try { localStorage.setItem(KEY, on ? '1' : '0') } catch (e) {}
   }
@@ -834,6 +863,16 @@ function initHerWorld() {
 
   let saved = '0'; try { saved = localStorage.getItem(KEY) || '0' } catch (e) {}
   if (saved === '1') apply(true, false)
+}
+
+// ── Lanyard presence target (switches with her world) ──
+// Holds whichever Discord ID the widget is currently showing. Declared
+// before boot so initHerWorld() can flip it when a saved theme restores.
+let _activeDiscordId = SITE.user.discordUserId
+function setDiscordPresenceId(id) {
+  if (!id || id === _activeDiscordId) return
+  _activeDiscordId = id
+  fetchDiscordPresence()   // refresh the widget immediately, no reload
 }
 
 // ── boot ─────────────────────────────────────────────────────────────
@@ -911,7 +950,7 @@ function renderActivity(activity) {
 
 async function fetchDiscordPresence() {
   console.log("Fetching Discord presence...")
-  const id = SITE.user.discordUserId
+  const id = _activeDiscordId
   if (!id) return
   try {
     const res = await fetch(`https://api.lanyard.rest/v1/users/${id}`)
