@@ -357,12 +357,16 @@
       position: fixed; right: 16px; bottom: 14px; z-index: 10001;
       width: 34px; height: 34px; display: flex; align-items: center;
       justify-content: center; padding: 0; cursor: pointer;
-      background: transparent; border: 1px solid var(--border);
-      border-radius: 50%; color: var(--muted); opacity: 0.45;
+      background: transparent; border: 1px solid rgba(255, 150, 190, 0.5);
+      border-radius: 50%; color: #ff8fbf; opacity: 0.75;
+      box-shadow: 0 0 14px rgba(255, 130, 180, 0.55);
       transition: opacity .35s ease, color .6s ease, border-color .6s ease,
                   box-shadow .6s ease, transform .35s ease;
     }
-    #her-bunny:hover { opacity: 1; transform: translateY(-2px); color: var(--soft); }
+    #her-bunny:hover {
+      opacity: 1; transform: translateY(-2px); color: #ffa6cf;
+      box-shadow: 0 0 20px rgba(255, 130, 180, 0.8);
+    }
     #her-bunny svg { display: block; }
     body.princess-mode #her-bunny {
       opacity: 0.9; color: var(--gold);
