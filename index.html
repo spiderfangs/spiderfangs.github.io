@@ -99,6 +99,27 @@
     .s-status-text.s-offline { background: transparent; color: var(--muted); }
     .s-handle { font-family: var(--font-mono); font-size: 9px; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .status-box > div.s-info { min-width: 0; flex: 1; }
+    /* alt accounts sit behind the main card, bottoms peeking out */
+    .acct-stack { position: relative; cursor: pointer; transition: height 0.6s ease; }
+    .acct-stack .alt-box {
+      position: absolute; left: 0; right: 0; top: 0;
+      transform-origin: top center;
+      transition: transform 0.6s ease, opacity 0.6s ease, filter 0.6s ease;
+      opacity: 0.5; filter: brightness(0.72);
+    }
+    .acct-stack.open .alt-box { opacity: 1; filter: none; }
+    .acct-stack > #status-primary { position: relative; z-index: 5; }
+    .stack-caret {
+      position: absolute; right: 10px; bottom: 8px; z-index: 6;
+      display: flex; color: var(--muted); opacity: 0.55;
+      transition: transform 0.5s ease, opacity 0.6s ease;
+      transform: rotate(90deg); pointer-events: none;
+    }
+    .acct-stack:hover .stack-caret { opacity: 0.9; }
+    .acct-stack.open .stack-caret { transform: rotate(-90deg); }
+    body.princess-mode .acct-stack { height: auto !important; cursor: default; }
+    body.princess-mode .acct-stack .alt-box,
+    body.princess-mode .stack-caret { display: none; }
     .act-art { position: relative; width: 52px; height: 52px; flex-shrink: 0; border-radius: 4px; overflow: visible; }
     .act-art > img:first-child { width: 100%; height: 100%; -o-object-fit: cover; object-fit: cover; border-radius: 4px; display: block; background: var(--dim); }
     .act-art-sm { position: absolute; right: -4px; bottom: -4px; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--bg-soft); background: var(--bg-soft); -o-object-fit: cover; object-fit: cover; }
@@ -492,6 +513,10 @@ const SITE = {
     status:        "offline",              // online | idle | dnd | offline
     statusVisible: false,
     discordUserId: "1375870716691480767",  // lanyard
+    altDiscordIds: [                       // dropdown, in order. dark side only
+      "1532392432086417482",               // 2nd
+      "911073545734467654",                // 3rd
+    ],
   },
   links: [
     { label: `<svg style="display:block" width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`, url: "https://youtube.com/@ħacks" },
@@ -573,6 +598,7 @@ const I = {
 // ── Build sidebar ──────────────────────────────────────────────────
 function buildSidebar() {
   const { user, links } = SITE
+  const alts = (user.altDiscordIds || []).filter(Boolean)
   document.getElementById('sidebar').innerHTML = `
     <div class="sb-username">${user.name}</div>
     <div class="sb-avatar">
@@ -581,20 +607,36 @@ function buildSidebar() {
     </div>
     <div>
       <div class="section-lbl">status</div>
-      <div class="status-box">
-        <div class="disc-av">
-          ${I.discord}
-        </div>
-        <div class="s-info">
-          <div class="s-name-row">
-            <span class="s-name">${user.name}</span>
+      <div class="acct-stack" id="acct-stack"
+           ${alts.length ? 'role="button" tabindex="0" aria-expanded="false"' : ''}>
+        <div class="status-box" id="status-primary">
+          <div class="disc-av">
+            ${I.discord}
           </div>
-          <div class="s-handle">${user.handle}</div>
-          <div class="s-status-row">
-            <span class="s-dot s-${user.status}"></span>
-            <span class="s-status-text s-${user.status}">${user.status}</span>
+          <div class="s-info">
+            <div class="s-name-row">
+              <span class="s-name">${user.name}</span>
+            </div>
+            <div class="s-handle">${user.handle}</div>
+            <div class="s-status-row">
+              <span class="s-dot s-${user.status}"></span>
+              <span class="s-status-text s-${user.status}">${user.status}</span>
+            </div>
           </div>
+          ${alts.length ? `<span class="stack-caret">${I.arrow}</span>` : ''}
         </div>
+        ${alts.map(id => `
+          <div class="status-box alt-box" data-uid="${id}">
+            <div class="disc-av">${I.discord}</div>
+            <div class="s-info">
+              <div class="s-name-row"><span class="s-name">&nbsp;</span></div>
+              <div class="s-handle"></div>
+              <div class="s-status-row">
+                <span class="s-dot s-offline"></span>
+                <span class="s-status-text s-offline">offline</span>
+              </div>
+            </div>
+          </div>`).join('')}
       </div>
     </div>
     <div id="discord-activity"></div>
@@ -708,6 +750,9 @@ function buildMain() {
 
 // ── Player logic ────────────────────────────────────────────────────
 const VOL_KEY = 'biolink_vol'
+// storage throws if site data is blocked — dont let it kill the whole script
+const lsGet = k => { try { return localStorage.getItem(k) } catch (e) { return null } }
+const lsSet = (k, v) => { try { localStorage.setItem(k, v) } catch (e) {} }
 
 function initPlayer() {
   let tracks = SITE.music.tracks   
@@ -719,7 +764,7 @@ function initPlayer() {
   audio.src = tracks[cur].file
   audio.preload = 'metadata'
 
-  const saved = parseFloat(localStorage.getItem(VOL_KEY) || '0.5')
+  const saved = parseFloat(lsGet(VOL_KEY) || '0.5')
   audio.volume = saved
 
   const $  = id => document.getElementById(id)
@@ -772,7 +817,7 @@ function initPlayer() {
   bn.addEventListener('click', () => load((cur+1)%tracks.length, playing))
 
   ps.addEventListener('input', () => { if(audio.duration) audio.currentTime=ps.value*audio.duration; pf.style.width=(ps.value*100)+'%' })
-  vs.addEventListener('input', () => { const v=parseFloat(vs.value); audio.volume=v; vf.style.width=(v*100)+'%'; localStorage.setItem(VOL_KEY,v) })
+  vs.addEventListener('input', () => { const v=parseFloat(vs.value); audio.volume=v; vf.style.width=(v*100)+'%'; lsSet(VOL_KEY,v) })
 
   tlist.addEventListener('click', e => {
     const it = e.target.closest('.trk-item')
@@ -1052,84 +1097,151 @@ function renderActivity(activity) {
   }
 }
 
-async function fetchDiscordPresence() {
-  console.log("Fetching Discord presence...")
-  const id = _activeDiscordId
-  if (!id) return
-  try {
-    const res = await fetch(`https://api.lanyard.rest/v1/users/${id}`)
-    const data = await res.json()
-    console.log("Response:", data)
-    console.log("Activities:", data.data && data.data.activities)
-    if (!data || !data.success || !data.data) return
+// paint one status box from a lanyard payload
+function paintStatus(box, d) {
+  if (!box || !d) return
+  const q = sel => box.querySelector(sel)
+  const statusKey = d.discord_status || 'offline'
 
-    const d = data.data
-    const statusKey = d.discord_status || 'offline'
+  const dot = q('.s-dot')
+  if (dot) {
+    dot.classList.remove('s-online', 's-idle', 's-dnd', 's-offline')
+    dot.classList.add('s-' + statusKey)
+  }
+  const statusText = q('.s-status-text')
+  if (statusText) {
+    statusText.classList.remove('s-online', 's-idle', 's-dnd', 's-offline')
+    statusText.classList.add('s-status-text', 's-' + statusKey)
+    statusText.textContent = statusKey
+  }
 
-    const dot = document.querySelector('.status-box .s-dot')
-    if (dot) {
-      dot.classList.remove('s-online', 's-idle', 's-dnd', 's-offline')
-      dot.classList.add('s-' + statusKey)
+  const u = d.discord_user || {}
+  const displayName = u.global_name || u.username
+  const sName = q('.s-name')
+  const sHandle = q('.s-handle')
+  if (sName && displayName) sName.textContent = displayName
+  if (sHandle && u.username) sHandle.textContent = '@' + u.username
+
+  const clan = u.clan || u.primary_guild
+  const nameRow = q('.s-name-row')
+  if (nameRow) {
+    const existing = nameRow.querySelector('.s-clan')
+    if (existing) existing.remove()
+    if (clan && clan.tag && clan.identity_enabled !== false) {
+      const badgeUrl = clan.badge && clan.identity_guild_id
+        ? `https://cdn.discordapp.com/clan-badges/${clan.identity_guild_id}/${clan.badge}.png?size=16`
+        : null
+      const tagEl = document.createElement('span')
+      tagEl.className = 's-clan'
+      tagEl.innerHTML = `${badgeUrl ? `<img src="${badgeUrl}" alt="" onerror="this.remove()" />` : ''}<span>${escHtml(clan.tag)}</span>`
+      nameRow.appendChild(tagEl)
     }
-    const statusText = document.querySelector('.status-box .s-status-text')
-    if (statusText) {
-      statusText.classList.remove('s-online', 's-idle', 's-dnd', 's-offline')
-      statusText.classList.add('s-status-text', 's-' + statusKey)
-      statusText.textContent = statusKey
+  }
+
+  const avatarUrl = u.id && u.avatar
+    ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=128`
+    : null
+  const discAv = q('.disc-av')
+  if (discAv && avatarUrl) {
+    let img = discAv.querySelector('img.disc-avatar')
+    if (!img) {
+      const svg = discAv.querySelector('svg')
+      if (svg) svg.remove()
+      img = document.createElement('img')
+      img.className = 'disc-avatar'
+      img.alt = displayName || ''
+      img.onerror = function () { this.remove() }
+      discAv.appendChild(img)
     }
-
-    const u = d.discord_user || {}
-    const displayName = u.global_name || u.username
-    const sName = document.querySelector('.status-box .s-name')
-    const sHandle = document.querySelector('.status-box .s-handle')
-    if (sName && displayName) sName.textContent = displayName
-    if (sHandle && u.username) sHandle.textContent = '@' + u.username
-
-    const clan = u.clan || u.primary_guild
-    const nameRow = document.querySelector('.status-box .s-name-row')
-    if (nameRow) {
-      const existing = nameRow.querySelector('.s-clan')
-      if (existing) existing.remove()
-      if (clan && clan.tag && clan.identity_enabled !== false) {
-        const badgeUrl = clan.badge && clan.identity_guild_id
-          ? `https://cdn.discordapp.com/clan-badges/${clan.identity_guild_id}/${clan.badge}.png?size=16`
-          : null
-        const tagEl = document.createElement('span')
-        tagEl.className = 's-clan'
-        tagEl.innerHTML = `${badgeUrl ? `<img src="${badgeUrl}" alt="" onerror="this.remove()" />` : ''}<span>${escHtml(clan.tag)}</span>`
-        nameRow.appendChild(tagEl)
-      }
-    }
-
-    const avatarUrl = u.id && u.avatar
-      ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=128`
-      : null
-    const discAv = document.querySelector('.status-box .disc-av')
-    if (discAv && avatarUrl) {
-      let img = discAv.querySelector('img.disc-avatar')
-      if (!img) {
-        const svg = discAv.querySelector('svg')
-        if (svg) svg.remove()
-        img = document.createElement('img')
-        img.className = 'disc-avatar'
-        img.alt = displayName || ''
-        img.onerror = function () { this.remove() }
-        discAv.appendChild(img)
-      }
-      if (img.src !== avatarUrl) img.src = avatarUrl
-    }
-
-    const activity = (d.activities || []).find(a => a.type !== 4)
-    renderActivity(activity)
-  } catch (err) {
-    console.log("Lanyard fetch failed", err)
+    if (img.src !== avatarUrl) img.src = avatarUrl
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+async function lanyard(id) {
+  if (!id) return null
+  try {
+    const res = await fetch(`https://api.lanyard.rest/v1/users/${id}`)
+    const data = await res.json()
+    return (data && data.success && data.data) ? data.data : null
+  } catch (err) {
+    console.log("Lanyard fetch failed", id, err)
+    return null
+  }
+}
+
+async function fetchDiscordPresence() {
+  const d = await lanyard(_activeDiscordId)
+  if (!d) return
+  paintStatus(document.getElementById('status-primary'), d)
+  renderActivity((d.activities || []).find(a => a.type !== 4))
+}
+
+// the cards behind the main one. dark side only, her world hides them
+async function fetchAltPresences() {
+  const boxes = document.querySelectorAll('.alt-box')
+  for (const box of boxes) {
+    const d = await lanyard(box.dataset.uid)
+    if (d) paintStatus(box, d)
+  }
+  layoutStack()   // names/avatars can change the height
+}
+
+const PEEK = 7    // how much of each card behind shows
+const GAP  = 10   // spacing once its open
+let _stackOpen = false
+
+// measure instead of guessing — card height moves w font loads n long names
+function layoutStack() {
+  const stack = document.getElementById('acct-stack')
+  if (!stack) return
+  const primary = document.getElementById('status-primary')
+  const alts = [...stack.querySelectorAll('.alt-box')]
+  if (!primary || !alts.length) return
+
+  const h = primary.offsetHeight
+  alts.forEach((el, i) => {
+    const n = i + 1
+    el.style.transform = _stackOpen
+      ? `translateY(${n * (h + GAP)}px) scale(1)`
+      : `translateY(${n * PEEK}px) scale(${(1 - n * 0.03).toFixed(3)})`
+  })
+  stack.style.height = _stackOpen
+    ? `${h + alts.length * (h + GAP)}px`
+    : `${h + alts.length * PEEK}px`
+}
+
+function initAlts() {
+  const stack = document.getElementById('acct-stack')
+  if (!stack || !stack.querySelector('.alt-box')) return
+
+  const toggle = () => {
+    if (document.body.classList.contains('princess-mode')) return
+    _stackOpen = !_stackOpen
+    stack.classList.toggle('open', _stackOpen)
+    stack.setAttribute('aria-expanded', String(_stackOpen))
+    layoutStack()
+  }
+
+  stack.addEventListener('click', toggle)
+  stack.addEventListener('keydown', e => {
+    if (e.code === 'Enter' || e.code === 'Space') { e.preventDefault(); toggle() }
+  })
+  window.addEventListener('resize', layoutStack)
+  layoutStack()
+  // fonts land late n change the height
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(layoutStack)
+}
+
+function bootLanyard() {
+  initAlts()
   fetchDiscordPresence()
+  fetchAltPresences()
   setInterval(fetchDiscordPresence, 15000)
-})
+  setInterval(fetchAltPresences, 30000)
+}
+// this sits at the end of body so the dom is usually up already
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootLanyard)
+else bootLanyard()
 
 // ── overlay ────────────────────────────────────
 ;(function initIntro() {
