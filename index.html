@@ -279,57 +279,21 @@
       -webkit-backdrop-filter: blur(0px);
       transition: opacity 2.6s ease, backdrop-filter 2.6s ease;
     }
-    /* blood drop — one bead gathers at the top, waits, falls. the site comes up through the red */
-    .intro-overlay { background: #000; }
-    .bd { position: absolute; inset: 0; overflow: hidden; }
-    .bd-trail {
-      position: absolute; left: 50%; top: 0; width: 3px; height: 24vh; margin-left: -1.5px; border-radius: 0 0 2px 2px;
-      background: linear-gradient(180deg, #24020a 0%, #3e040d 70%, #5a0712 100%);
-      transform-origin: 50% 0; transform: scaleY(0);
-      animation: bd-run 3.2s cubic-bezier(0.3, 0, 0.2, 1) 0.5s forwards;
-    }
-    .bd-drop {
-      position: absolute; left: 50%; top: calc(24vh - 6px); width: 22px; height: 22px; margin-left: -11px;
-      transform-origin: 50% 0; transform: translateY(-6px) scale(0);
-      animation: bd-form 2.6s cubic-bezier(0.4, 0, 0.3, 1) 3.4s forwards, bd-tremble 2.6s ease-in-out 6s infinite;
-    }
-    .bd-drop i {
-      position: absolute; inset: 0; border-radius: 0 50% 50% 50%; transform: rotate(45deg);
-      background: radial-gradient(circle at 62% 62%, #8e0f1b 0%, #5a0610 45%, #2c0207 100%);
-      box-shadow: 0 0 14px 2px rgba(120, 0, 14, 0.25);
-    }
-    .bd-drop i::after {   /* the wet glint */
-      content: ''; position: absolute; left: 50%; top: 50%; width: 3px; height: 4px; border-radius: 50%;
-      background: rgba(255, 150, 160, 0.3); transform: translate(20%, 40%) rotate(-45deg);
-    }
-    .bd-splash {
-      position: absolute; left: 50%; top: 62%; width: 60vmax; height: 60vmax; margin: -30vmax 0 0 -30vmax; border-radius: 50%;
-      background: radial-gradient(circle, #3d0008 0%, #2a0006 38%, rgba(24,0,5,0.85) 58%, rgba(10,0,2,0) 72%);
-      transform: scale(0); opacity: 0;
-    }
-    @keyframes bd-run { to { transform: scaleY(1) } }
-    @keyframes bd-form {
-      0%   { transform: translateY(-6px) scale(0.1) }
-      70%  { transform: translateY(6px)  scale(0.9, 1.05) }
-      100% { transform: translateY(10px) scale(1) }
-    }
-    @keyframes bd-tremble {
-      0%, 100% { transform: translateY(10px) scale(1, 1) }
-      40% { transform: translateY(11px) scale(0.97, 1.05) }
-      70% { transform: translateY(10px) scale(1.02, 0.98) }
-    }
-    /* clicked — it lets go */
-    .intro-overlay.fall .bd-drop { animation: bd-fall 0.62s cubic-bezier(0.55, 0, 1, 0.45) forwards; }
-    .intro-overlay.fall .bd-splash { animation: bd-splash 1.5s cubic-bezier(0.2, 0.7, 0.3, 1) 0.6s forwards; }
-    @keyframes bd-fall {
-      0%   { transform: translateY(10px) scale(1, 1) }
-      15%  { transform: translateY(14px) scale(0.85, 1.35) }
-      100% { transform: translateY(38vh) scale(0.7, 1.7) }
-    }
-    @keyframes bd-splash { 0% { transform: scale(0); opacity: 1 } 100% { transform: scale(3.2); opacity: 1 } }
+    /* crosshair — a dim red reticle searching the dark. click and it takes the shot */
+    .intro-overlay { background: #000; cursor: none; }
+    .ch { position: absolute; left: 0; top: 0; width: 150px; height: 150px; margin: -75px 0 0 -75px; will-change: transform; opacity: 0; transition: opacity 2s ease 0.4s; }
+    .intro-overlay.ready .ch { opacity: 1; }
+    .ch svg { width: 100%; height: 100%; overflow: visible; transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1); }
+    .ch .r { fill: none; stroke: rgba(150, 16, 26, 0.7); stroke-width: 1.1; filter: drop-shadow(0 0 3px rgba(160, 10, 24, 0.45)); transition: stroke 0.2s; }
+    .ch .d { fill: rgba(190, 24, 36, 0.85); }
+    .ch-flash { position: absolute; inset: 0; background: #2a0006; opacity: 0; pointer-events: none; }
+    /* clicked — tightens on the mark, then the shot */
+    .intro-overlay.lock .ch svg { transform: scale(0.72); }
+    .intro-overlay.lock .ch .r { stroke: rgba(210, 30, 44, 0.95); }
+    .intro-overlay.shot .ch { opacity: 0; transition: none; }
+    .intro-overlay.shot .ch-flash { opacity: 1; }
     @media (prefers-reduced-motion: reduce) {
-      .bd-trail { animation: none; transform: none; }
-      .bd-drop { animation: none !important; transform: translateY(10px) scale(1); }
+      .ch svg { transition: none; }
     }
 
     /* the dark side keeps a little of the red at its edges. her world keeps its own vignette */
@@ -542,11 +506,16 @@
 </head>
 <body class="intro-active">
   <div class="intro-overlay" id="intro" role="button" aria-label="enter">
-    <div class="bd" aria-hidden="true">
-      <div class="bd-splash"></div>
-      <div class="bd-trail"></div>
-      <div class="bd-drop"><i></i></div>
+    <div class="ch" id="ch" aria-hidden="true">
+      <svg viewBox="0 0 150 150">
+        <circle class="r" cx="75" cy="75" r="52"/>
+        <circle class="r" cx="75" cy="75" r="18" style="stroke-opacity:.45"/>
+        <path class="r" d="M75 4 V58 M75 92 V146 M4 75 H58 M92 75 H146"/>
+        <path class="r" d="M70 23 H80 M70 127 H80 M23 70 V80 M127 70 V80" style="stroke-opacity:.6"/>
+        <circle class="d" cx="75" cy="75" r="1.6"/>
+      </svg>
     </div>
+    <div class="ch-flash"></div>
   </div>
 
   <div id="her-glow" aria-hidden="true"></div>
@@ -1325,7 +1294,29 @@ else bootLanyard()
   let dismissed = false
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-  const dismiss = () => {
+  // the reticle wanders on its own; move the mouse and you take over the scope
+  const ch = document.getElementById('ch')
+  let x = innerWidth / 2, y = innerHeight / 2, mx = null, my = null, lastMove = 0, aiming = true
+  ov.addEventListener('pointermove', e => { mx = e.clientX; my = e.clientY; lastMove = performance.now() })
+  const aim = now => {
+    if (!aiming) return
+    requestAnimationFrame(aim)
+    const t = now / 1000, W = innerWidth, H = innerHeight
+    let tx, ty
+    if (mx !== null && now - lastMove < 2500) { tx = mx; ty = my }
+    else {
+      tx = W / 2 + Math.sin(t * 0.21) * W * 0.26 + Math.sin(t * 0.57 + 1) * W * 0.06
+      ty = H / 2 + Math.sin(t * 0.17 + 2) * H * 0.22 + Math.cos(t * 0.49) * H * 0.05
+    }
+    x += (tx - x) * 0.045; y += (ty - y) * 0.045
+    // a little hand shake
+    const sx = Math.sin(t * 7.3) * 0.7 + Math.sin(t * 11.1) * 0.4, sy = Math.cos(t * 6.1) * 0.7 + Math.sin(t * 9.7) * 0.4
+    ch.style.transform = `translate(${(x + sx).toFixed(1)}px, ${(y + sy).toFixed(1)}px)`
+  }
+  if (reduced) ch.style.transform = `translate(${x}px, ${y}px)`
+  else requestAnimationFrame(aim)
+
+  const dismiss = e => {
     if (dismissed) return
     dismissed = true
 
@@ -1338,11 +1329,15 @@ else bootLanyard()
       document.body.classList.remove('intro-active')
       setTimeout(() => { ov.remove() }, 2700)
     }
+    aiming = false
     if (reduced) { reveal(); return }
 
-    // it lets go, hits, spreads — and the site comes up through it
-    ov.classList.add('fall')
-    setTimeout(reveal, 1250)
+    // settle on the spot, tighten, fire
+    if (e && e.clientX !== undefined && e.clientX + e.clientY > 0) { x = e.clientX; y = e.clientY }
+    ch.style.transition = 'transform 0.18s ease-out'
+    ch.style.transform = `translate(${x}px, ${y}px)`
+    ov.classList.add('lock')
+    setTimeout(() => { ov.classList.add('shot'); reveal() }, 420)
   }
   // no auto dismiss, u gotta click
   ov.addEventListener('click', dismiss, { once: true })
