@@ -279,63 +279,62 @@
       -webkit-backdrop-filter: blur(0px);
       transition: opacity 2.6s ease, backdrop-filter 2.6s ease;
     }
-    /* candle — one small flame in the dark. click blows it out */
+    /* blood drop — one bead gathers at the top, waits, falls. the site comes up through the red */
     .intro-overlay { background: #000; }
-    .cd {
-      position: relative; width: 120px; height: 220px;
-      opacity: 0; animation: cd-in 2.4s ease 0.3s forwards;
+    .bd { position: absolute; inset: 0; overflow: hidden; }
+    .bd-trail {
+      position: absolute; left: 50%; top: 0; width: 3px; height: 24vh; margin-left: -1.5px; border-radius: 0 0 2px 2px;
+      background: linear-gradient(180deg, #24020a 0%, #3e040d 70%, #5a0712 100%);
+      transform-origin: 50% 0; transform: scaleY(0);
+      animation: bd-run 3.2s cubic-bezier(0.3, 0, 0.2, 1) 0.5s forwards;
     }
-    .cd-glow {
-      position: absolute; left: 50%; top: 52px; width: 520px; height: 520px; transform: translate(-50%, -50%);
-      background: radial-gradient(circle, rgba(255,160,70,0.09) 0%, rgba(255,120,40,0.035) 30%, transparent 62%);
-      animation: cd-glow 3.1s ease-in-out infinite; pointer-events: none;
+    .bd-drop {
+      position: absolute; left: 50%; top: calc(24vh - 6px); width: 22px; height: 22px; margin-left: -11px;
+      transform-origin: 50% 0; transform: translateY(-6px) scale(0);
+      animation: bd-form 2.6s cubic-bezier(0.4, 0, 0.3, 1) 3.4s forwards, bd-tremble 2.6s ease-in-out 6s infinite;
     }
-    .cd-stick {
-      position: absolute; left: 50%; top: 92px; width: 22px; height: 110px; transform: translateX(-50%);
-      background: linear-gradient(180deg, rgba(150,120,95,0.26) 0%, rgba(70,55,45,0.13) 35%, rgba(0,0,0,0) 100%);
-      border-radius: 3px 3px 0 0;
+    .bd-drop i {
+      position: absolute; inset: 0; border-radius: 0 50% 50% 50%; transform: rotate(45deg);
+      background: radial-gradient(circle at 62% 62%, #8e0f1b 0%, #5a0610 45%, #2c0207 100%);
+      box-shadow: 0 0 14px 2px rgba(120, 0, 14, 0.25);
     }
-    .cd-wick { position: absolute; left: 50%; top: 82px; width: 1.5px; height: 12px; transform: translateX(-50%); background: #1a1410; }
-    .cd-flame {
-      position: absolute; left: 50%; top: 46px; width: 12px; height: 38px; margin-left: -6px;
-      border-radius: 50% 50% 45% 45% / 70% 70% 30% 30%;
-      background: radial-gradient(ellipse at 50% 78%, rgba(120,150,255,0.55) 0%, rgba(255,214,150,0.95) 22%, rgba(255,160,70,0.85) 48%, rgba(220,90,30,0.25) 78%, transparent 100%);
-      filter: blur(0.6px); box-shadow: 0 0 10px 2px rgba(255,150,60,0.22);
-      transform-origin: 50% 90%;
-      animation: cd-flicker 2.3s ease-in-out infinite;
+    .bd-drop i::after {   /* the wet glint */
+      content: ''; position: absolute; left: 50%; top: 50%; width: 3px; height: 4px; border-radius: 50%;
+      background: rgba(255, 150, 160, 0.3); transform: translate(20%, 40%) rotate(-45deg);
     }
-    .cd-smoke { position: absolute; left: 50%; top: -110px; width: 80px; height: 200px; margin-left: -40px; overflow: visible; opacity: 0; pointer-events: none; }
-    .cd-smoke path { fill: none; stroke: rgba(190,190,190,0.42); stroke-width: 1.6; stroke-linecap: round; filter: blur(1.2px); stroke-dasharray: 1 1; stroke-dashoffset: 1; }
-    @keyframes cd-in { to { opacity: 1 } }
-    @keyframes cd-glow {
-      0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1) }
-      30% { opacity: .82; transform: translate(-50%, -50%) scale(.97) }
-      55% { opacity: .95 } 70% { opacity: .78; transform: translate(-50%, -50%) scale(1.02) }
+    .bd-splash {
+      position: absolute; left: 50%; top: 62%; width: 60vmax; height: 60vmax; margin: -30vmax 0 0 -30vmax; border-radius: 50%;
+      background: radial-gradient(circle, #3d0008 0%, #2a0006 38%, rgba(24,0,5,0.85) 58%, rgba(10,0,2,0) 72%);
+      transform: scale(0); opacity: 0;
     }
-    @keyframes cd-flicker {
-      0%, 100% { transform: scale(1, 1) skewX(0deg); opacity: .95 }
-      18% { transform: scale(.96, 1.04) skewX(1.5deg) }
-      34% { transform: scale(1.03, .95) skewX(-1deg); opacity: .88 }
-      52% { transform: scale(.97, 1.06) skewX(2deg); opacity: 1 }
-      71% { transform: scale(1.02, .97) skewX(-2deg); opacity: .9 }
-      86% { transform: scale(.98, 1.02) skewX(.5deg) }
+    @keyframes bd-run { to { transform: scaleY(1) } }
+    @keyframes bd-form {
+      0%   { transform: translateY(-6px) scale(0.1) }
+      70%  { transform: translateY(6px)  scale(0.9, 1.05) }
+      100% { transform: translateY(10px) scale(1) }
     }
-    /* clicked — blown out */
-    .intro-overlay.out .cd-flame { animation: cd-die 0.5s ease-in forwards; }
-    .intro-overlay.out .cd-glow  { animation: none; opacity: 0; transition: opacity .6s ease; }
-    .intro-overlay.out .cd-stick { opacity: 0.35; transition: opacity 1.2s ease; }
-    .intro-overlay.out .cd-smoke { animation: cd-smoke 2.4s ease-out 0.25s forwards; }
-    .intro-overlay.out .cd-smoke path { animation: cd-draw 2.2s ease-out 0.25s forwards; }
-    @keyframes cd-die {
-      0% { transform: scale(1, 1) skewX(0); opacity: 1 }
-      35% { transform: scale(.8, 1.25) skewX(-14deg); opacity: .8 }
-      100% { transform: scale(.15, .05) skewX(-20deg); opacity: 0 }
+    @keyframes bd-tremble {
+      0%, 100% { transform: translateY(10px) scale(1, 1) }
+      40% { transform: translateY(11px) scale(0.97, 1.05) }
+      70% { transform: translateY(10px) scale(1.02, 0.98) }
     }
-    @keyframes cd-smoke { 0% { opacity: 0; transform: translateY(0) } 15% { opacity: 1 } 100% { opacity: 0; transform: translateY(-40px) } }
-    @keyframes cd-draw { to { stroke-dashoffset: 0 } }
+    /* clicked — it lets go */
+    .intro-overlay.fall .bd-drop { animation: bd-fall 0.62s cubic-bezier(0.55, 0, 1, 0.45) forwards; }
+    .intro-overlay.fall .bd-splash { animation: bd-splash 1.5s cubic-bezier(0.2, 0.7, 0.3, 1) 0.6s forwards; }
+    @keyframes bd-fall {
+      0%   { transform: translateY(10px) scale(1, 1) }
+      15%  { transform: translateY(14px) scale(0.85, 1.35) }
+      100% { transform: translateY(38vh) scale(0.7, 1.7) }
+    }
+    @keyframes bd-splash { 0% { transform: scale(0); opacity: 1 } 100% { transform: scale(3.2); opacity: 1 } }
     @media (prefers-reduced-motion: reduce) {
-      .cd { animation: none; opacity: 1; }
-      .cd-glow, .cd-flame { animation: none !important; }
+      .bd-trail { animation: none; transform: none; }
+      .bd-drop { animation: none !important; transform: translateY(10px) scale(1); }
+    }
+
+    /* the dark side keeps a little of the red at its edges. her world keeps its own vignette */
+    body:not(.princess-mode)::before {
+      background: radial-gradient(120% 95% at 50% 20%, transparent 32%, rgba(14,0,2,0.42) 74%, rgba(16,0,3,0.82) 100%);
     }
 
     body.princess-mode {
@@ -543,15 +542,10 @@
 </head>
 <body class="intro-active">
   <div class="intro-overlay" id="intro" role="button" aria-label="enter">
-    <div class="cd" aria-hidden="true">
-      <div class="cd-glow"></div>
-      <svg class="cd-smoke" viewBox="0 0 80 200">
-        <path pathLength="1" d="M40 196 C 36 176, 46 162, 41 146 S 30 118, 38 100 S 52 70, 42 50 S 30 22, 38 2"/>
-        <path pathLength="1" d="M40 196 C 44 178, 35 160, 42 140 S 50 112, 44 92" style="stroke-width:1.1;stroke:rgba(170,170,170,.28)"/>
-      </svg>
-      <div class="cd-stick"></div>
-      <div class="cd-wick"></div>
-      <div class="cd-flame"></div>
+    <div class="bd" aria-hidden="true">
+      <div class="bd-splash"></div>
+      <div class="bd-trail"></div>
+      <div class="bd-drop"><i></i></div>
     </div>
   </div>
 
@@ -1346,9 +1340,9 @@ else bootLanyard()
     }
     if (reduced) { reveal(); return }
 
-    // blown out, smoke goes up, then the room comes back
-    ov.classList.add('out')
-    setTimeout(reveal, 1300)
+    // it lets go, hits, spreads — and the site comes up through it
+    ov.classList.add('fall')
+    setTimeout(reveal, 1250)
   }
   // no auto dismiss, u gotta click
   ov.addEventListener('click', dismiss, { once: true })
