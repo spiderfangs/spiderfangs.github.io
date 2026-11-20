@@ -288,9 +288,10 @@
     .ch .d { fill: rgba(190, 24, 36, 0.85); }
     .ch-flash { position: absolute; inset: 0; background: #2a0006; opacity: 0; pointer-events: none; }
     /* the target: a goat skull somewhere in the dark. it only shows itself when the scope gets close */
-    .sk { position: absolute; left: 0; top: 0; width: clamp(84px, 9vw, 120px); transform: translate(-50%, -50%); opacity: 0.1; pointer-events: none;
+    .sk { position: absolute; left: 0; top: 0; width: clamp(150px, 15vw, 210px); mix-blend-mode: screen;
+          -webkit-mask-image: radial-gradient(closest-side, #000 82%, transparent 100%); mask-image: radial-gradient(closest-side, #000 82%, transparent 100%); transform: translate(-50%, -50%); opacity: 0.1; pointer-events: none;
           -webkit-user-select: none; user-select: none; filter: drop-shadow(0 0 0 rgba(0,0,0,0)); transition: filter 0.3s; }
-    .intro-overlay.on .sk { filter: drop-shadow(0 0 14px rgba(200, 190, 170, 0.25)); }
+    .intro-overlay.on .sk { filter: brightness(1.15) contrast(1.05); }
     .intro-overlay.on .ch svg { transform: scale(0.86); }
     .intro-overlay.on .ch .r { stroke: rgba(200, 26, 40, 0.9); }
     /* missed — the scope kicks */
@@ -594,7 +595,7 @@
 </head>
 <body class="intro-active">
   <div class="intro-overlay" id="intro" role="button" aria-label="enter">
-    <img class="sk" id="sk" src="images/goat_skull.svg" alt="" aria-hidden="true" draggable="false" />
+    <img class="sk" id="sk" src="images/goat_skull.jpg" alt="" aria-hidden="true" draggable="false" />
     <div class="ch" id="ch" aria-hidden="true">
       <svg viewBox="0 0 150 150">
         <circle class="r" cx="75" cy="75" r="52"/>
@@ -1408,15 +1409,25 @@ else bootLanyard()
   const placeSkull = () => {
     const W = innerWidth, H = innerHeight
     const side = Math.random() < 0.5 ? -1 : 1
+    const sw = sk.offsetWidth || 180, sh = sw * 1.11
     skx = W / 2 + side * W * (0.16 + Math.random() * 0.2)
     sky = H * (0.3 + Math.random() * 0.4)
+    // keep the whole pentagram on screen
+    skx = Math.min(W - sw / 2 - 12, Math.max(sw / 2 + 12, skx))
+    sky = Math.min(H - sh / 2 - 12, Math.max(sh / 2 + 12, sky))
     sk.style.transform = `translate(${skx}px, ${sky}px) translate(-50%, -50%)`
   }
   placeSkull(); addEventListener('resize', placeSkull)
   const base = matchMedia('(hover: none)').matches ? 0.32 : 0.08
-  const hitR = () => Math.max(34, sk.getBoundingClientRect().width * 0.5)
-  const near = (px, py) => Math.hypot(px - skx, py - sky)
-  ov.addEventListener('pointermove', e => { mx = e.clientX; my = e.clientY; lastMove = performance.now() })
+  // aim point is the skull's face inside the pentagram, a bit below the image's middle
+  const face = () => { const w = sk.offsetWidth, h = sk.offsetHeight; return [skx + w * 0.02, sky + h * 0.11] }
+  const hitR = () => Math.max(30, sk.offsetWidth * 0.19)
+  const near = (px, py) => { const [fx, fy] = face(); return Math.hypot(px - fx, py - fy) }
+  ov.addEventListener('pointermove', e => {
+    // only a real mouse steers the scope. touch taps aim on their own, and some browsers fire a phantom move at 0,0
+    if (e.pointerType === 'touch' || (e.clientX === 0 && e.clientY === 0)) return
+    mx = e.clientX; my = e.clientY; lastMove = performance.now()
+  })
   const aim = now => {
     if (!aiming) return
     requestAnimationFrame(aim)
@@ -1473,7 +1484,7 @@ else bootLanyard()
     ch.classList.remove('kick'); void ch.offsetWidth; ch.classList.add('kick')
   }
   // keyboard can't aim, so enter/space snaps the scope onto it
-  const autoAim = () => { x = skx; y = sky; enter() }
+  const autoAim = () => { [x, y] = face(); enter() }
   // no auto dismiss, u gotta click
   ov.addEventListener('click', shoot)
   ov.setAttribute('tabindex', '0')
