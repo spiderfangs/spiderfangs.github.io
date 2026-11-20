@@ -1403,18 +1403,11 @@ else bootLanyard()
   // the reticle wanders on its own; move the mouse and you take over the scope
   const ch = document.getElementById('ch')
   const sk = document.getElementById('sk')
-  let x = innerWidth / 2, y = innerHeight / 2, mx = null, my = null, lastMove = 0, aiming = true
-  // somewhere off-centre, never under the corners
+  let x = innerWidth * 0.18, y = innerHeight * 0.8, mx = null, my = null, lastMove = 0, aiming = true
   let skx = 0, sky = 0
+  // dead centre
   const placeSkull = () => {
-    const W = innerWidth, H = innerHeight
-    const side = Math.random() < 0.5 ? -1 : 1
-    const sw = sk.offsetWidth || 180, sh = sw * 1.11
-    skx = W / 2 + side * W * (0.16 + Math.random() * 0.2)
-    sky = H * (0.3 + Math.random() * 0.4)
-    // keep the whole pentagram on screen
-    skx = Math.min(W - sw / 2 - 12, Math.max(sw / 2 + 12, skx))
-    sky = Math.min(H - sh / 2 - 12, Math.max(sh / 2 + 12, sky))
+    skx = innerWidth / 2; sky = innerHeight / 2
     sk.style.transform = `translate(${skx}px, ${sky}px) translate(-50%, -50%)`
   }
   placeSkull(); addEventListener('resize', placeSkull)
