@@ -305,13 +305,12 @@
                   1240px 470px 0 0 rgba(235,230,215,.45), 380px 760px 0 1px rgba(235,230,215,.3), 1400px 220px 0 1px rgba(20,20,20,.6);
       animation: pj-dust 0.5s steps(1, end) infinite; }
     .pj-scratch { position: absolute; top: 0; bottom: 0; left: 30%; width: 1px; background: rgba(235,230,215,0.35); opacity: 0; animation: film-scratch 5s linear infinite; }
-    .pj-flash {
-      position: absolute; left: 50%; top: 50%; height: 100%; max-width: 100%; transform: translate(-50%, -50%);
-      object-fit: contain; filter: grayscale(1); opacity: 0;
-      animation: pj-flash-a 9s steps(1, end) 3.9s infinite;
+    /* a real 17th c. plague mask (Venice lazaretto, public domain) — barely there, like it's burned into the film */
+    .pj-ghost {
+      position: absolute; left: 50%; top: 50%; height: 82%; transform: translate(-50%, -50%);
+      opacity: 0;
+      animation: pj-ghost 11s ease-in-out 4.2s infinite;
     }
-    .pj-flash.b { animation-name: pj-flash-b; }
-    .pj-cut { position: absolute; inset: 0; background: #000; opacity: 0; animation: pj-cut 9s steps(1, end) 3.9s infinite; }
     .pj-play {
       position: absolute; left: 50%; top: 50%; width: 0; height: 0;
       border-left: 15px solid rgba(232,226,210,0.75); border-top: 9px solid transparent; border-bottom: 9px solid transparent;
@@ -331,20 +330,20 @@
       0% { transform: translate(0,0) } 25% { transform: translate(90px,40px) } 50% { transform: translate(-30px,120px) }
       75% { transform: translate(60px,-50px) }
     }
-    /* two cuts, ~1/10 s each: the lamb, then the mask */
-    @keyframes pj-flash-a { 0% { opacity: 0 } 0.2% { opacity: .95 } 0.7% { opacity: .6 } 1.1%, 100% { opacity: 0 } }
-    @keyframes pj-cut { 0% { opacity: 0 } 0.2%, 2.2% { opacity: 1 } 2.3%, 100% { opacity: 0 } }
-    @keyframes pj-flash-b { 0%, 1.1% { opacity: 0 } 1.2% { opacity: .95 } 1.7% { opacity: .7 } 2.3%, 100% { opacity: 0 } }
+    @keyframes pj-ghost {
+      0% { opacity: 0 } 7% { opacity: .16 } 9% { opacity: .1 } 11% { opacity: .2 }
+      14% { opacity: .13 } 17% { opacity: .18 } 24%, 100% { opacity: 0 }
+    }
     @keyframes pj-play  { 0% { opacity: .85 } 40% { opacity: .55 } 43% { opacity: .9 } 71% { opacity: .2 } 73% { opacity: .8 } }
 
     /* clicked — the light comes at you */
     .intro-overlay.go .pj-frame { transform: scale(1.35); filter: brightness(3.4); }
     .intro-overlay.go .pj-play  { animation: none; opacity: 0; }
-    .intro-overlay.go .pj-flash, .intro-overlay.go .pj-cut { animation: none; opacity: 0; }
+    .intro-overlay.go .pj-ghost { animation: none; opacity: 0; transition: opacity .3s; }
 
     @media (prefers-reduced-motion: reduce) {
       .pj-frame { animation: none; opacity: 1; transition: none; }
-      .pj-light, .pj-grain, .pj-dust, .pj-scratch, .pj-flash, .pj-cut { animation: none !important; }
+      .pj-light, .pj-grain, .pj-dust, .pj-scratch, .pj-ghost { animation: none !important; }
       .pj-play { animation: none; opacity: .8; }
       .intro-overlay.go .pj-frame { transform: none; filter: none; }
     }
@@ -557,9 +556,7 @@
     <div class="pj-frame" aria-hidden="true">
       <div class="pj-light"></div>
       <div class="pj-play"></div>
-      <div class="pj-cut"></div>
-      <img class="pj-flash" src="images/flash_lamb.jpg" alt="" />
-      <img class="pj-flash b" src="images/flash_mask.jpg" alt="" />
+      <img class="pj-ghost" src="images/flash_plague_mask.png" alt="" />
       <div class="pj-grain"></div>
       <div class="pj-dust"></div>
       <div class="pj-scratch"></div>
