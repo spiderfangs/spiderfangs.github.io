@@ -296,6 +296,61 @@
       .ch svg { transition: none; }
     }
 
+    /* ═══ dark side: horror / murder pass. every rule here is :not(.princess-mode) so her world stays exactly as it was ═══ */
+    body:not(.princess-mode) {
+      --red:      #8c1420;
+      --red-hi:   #b51c2b;
+      --red-glow: rgba(150, 14, 28, 0.45);
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke='%23a3121f' stroke-width='1.2'%3E%3Ccircle cx='12' cy='12' r='6.5'/%3E%3Cpath d='M12 1v6M12 17v6M1 12h6M17 12h6'/%3E%3C/g%3E%3Ccircle cx='12' cy='12' r='1' fill='%23c41a2a'/%3E%3C/svg%3E") 12 12, crosshair;
+    }
+    body:not(.princess-mode) :is(a, button, input, .trk-item, .dot, .acct-stack[role="button"]) { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke='%23d41c2e' stroke-width='1.4'%3E%3Ccircle cx='12' cy='12' r='4.5'/%3E%3Cpath d='M12 1v7M12 16v7M1 12h7M16 12h7'/%3E%3C/g%3E%3Ccircle cx='12' cy='12' r='1.6' fill='%23e02436'/%3E%3C/svg%3E") 12 12, pointer; }
+    body:not(.princess-mode) ::selection { background: #5a0a12; color: #f0d6d8; }
+    html:has(> body:not(.princess-mode)) ::-webkit-scrollbar-thumb { background: #3a0a10; }
+
+    /* no piano on this side */
+    body:not(.princess-mode) .piano-bar { display: none; }
+
+    /* the lambs keep their red */
+    body:not(.princess-mode) .sb-avatar img { filter: contrast(1.05); opacity: 0.92; animation: film-flicker-c 4.5s steps(1) infinite; }
+    body:not(.princess-mode) .sb-avatar:hover img { filter: contrast(1.08); opacity: 1; }
+    body:not(.princess-mode) .sb-avatar:hover { border-color: rgba(150,14,28,0.5); box-shadow: 0 0 0 1px rgba(150,14,28,0.18), 0 0 26px rgba(150,14,28,0.22); }
+    @keyframes film-flicker-c {
+      0%, 100% { filter: contrast(1.05) brightness(1) } 31% { filter: contrast(1.05) brightness(0.9) }
+      33% { filter: contrast(1.05) brightness(1.04) } 58% { filter: contrast(1.05) brightness(0.94) }
+      60% { filter: contrast(1.05) brightness(1) } 83% { filter: contrast(1.05) brightness(0.88) }
+      84% { filter: contrast(1.05) brightness(1.02) }
+    }
+
+    /* blood-red where it used to be grey */
+    body:not(.princess-mode) .trk-item.active { background: rgba(140, 20, 32, 0.07); }
+    body:not(.princess-mode) .trk-item.active::before,
+    body:not(.princess-mode) .bars span,
+    body:not(.princess-mode) .dot.active,
+    body:not(.princess-mode) .r-fill { background: var(--red); box-shadow: 0 0 8px var(--red-glow); }
+    body:not(.princess-mode) .trk-item:hover { background: rgba(140, 20, 32, 0.045); }
+    body:not(.princess-mode) input[type="range"]::-webkit-slider-thumb { background: #c9b8b9; box-shadow: 0 0 6px var(--red-glow); }
+    body:not(.princess-mode) input[type="range"]::-moz-range-thumb { background: #c9b8b9; box-shadow: 0 0 6px var(--red-glow); }
+    body:not(.princess-mode) :is(.section-lbl, .queue-lbl, .vol-lbl, .gal-num) { color: #6e1a22; }
+    body:not(.princess-mode) .p-label:hover { text-shadow: 0 0 14px rgba(170, 20, 34, 0.55); color: #e6d2d3; }
+    body:not(.princess-mode) .c-btn:hover, body:not(.princess-mode) .arr-btn:hover { color: var(--red-hi); filter: drop-shadow(0 0 5px var(--red-glow)); }
+    body:not(.princess-mode) .link-btn:hover { border-color: rgba(150,14,28,0.55); color: #d9c3c4; box-shadow: 0 0 14px rgba(150,14,28,0.25); }
+    body:not(.princess-mode) .panel:hover { border-color: rgba(150, 14, 28, 0.22); }
+
+    /* gallery = evidence: a scope's corner brackets sit over every picture */
+    body:not(.princess-mode) .gal-img-w::after {
+      content: ''; position: absolute; inset: 14px; pointer-events: none; z-index: 3; opacity: 0.55; transition: opacity 0.6s ease, inset 0.6s ease;
+      background:
+        linear-gradient(var(--red), var(--red)) top left / 18px 1px no-repeat,
+        linear-gradient(var(--red), var(--red)) top left / 1px 18px no-repeat,
+        linear-gradient(var(--red), var(--red)) top right / 18px 1px no-repeat,
+        linear-gradient(var(--red), var(--red)) top right / 1px 18px no-repeat,
+        linear-gradient(var(--red), var(--red)) bottom left / 18px 1px no-repeat,
+        linear-gradient(var(--red), var(--red)) bottom left / 1px 18px no-repeat,
+        linear-gradient(var(--red), var(--red)) bottom right / 18px 1px no-repeat,
+        linear-gradient(var(--red), var(--red)) bottom right / 1px 18px no-repeat;
+    }
+    body:not(.princess-mode) .gal-img-w:hover::after { opacity: 0.9; inset: 22px; }
+
     /* the dark side keeps a little of the red at its edges. her world keeps its own vignette */
     body:not(.princess-mode)::before {
       background: radial-gradient(120% 95% at 50% 20%, transparent 32%, rgba(14,0,2,0.42) 74%, rgba(16,0,3,0.82) 100%);
@@ -547,7 +602,7 @@ const SITE = {
   user: {
     name:          "david",
     handle:        "@midnight_bite_hysteria7841",
-    avatar:        "images/goat.jpg",    // path
+    avatar:        "images/momento_mori.jpg",    // path
     status:        "offline",              // online | idle | dnd | offline
     statusVisible: false,
     discordUserId: "1375870716691480767",  // lanyard
@@ -572,7 +627,7 @@ const SITE = {
     ],
   },
   gallery: {
-    title: "gallery",
+    title: "evidence",
     items: [
       { image: "images/goat_mask.jpg",      caption: "", number: "01 / 05", fit: "contain" },
       { image: "images/plague_street.jpg",  caption: "", number: "02 / 05", fit: "contain" },
