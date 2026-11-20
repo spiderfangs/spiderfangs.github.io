@@ -279,56 +279,70 @@
       -webkit-backdrop-filter: blur(0px);
       transition: opacity 2.6s ease, backdrop-filter 2.6s ease;
     }
-    /* heartbeat — red pulse at the edges + a monitor trace. lub dub, rest */
-    .hb-glow {
-      position: absolute; inset: 0; pointer-events: none;
-      background: radial-gradient(ellipse at center, transparent 30%, rgba(110,0,12,0.5) 78%, rgba(150,0,18,0.85) 100%);
-      opacity: 0.1;
-      animation: hb-beat 1.4s ease-out infinite;
+    /* projector warming up — lamp sputters on, dust, a frame you shouldnt have seen */
+    .intro-overlay { background: #040404; }
+    .pj-frame {
+      position: relative; width: min(66vw, 680px); aspect-ratio: 4 / 3;
+      opacity: 0; overflow: hidden; border-radius: 3px;
+      box-shadow: 0 0 90px 10px rgba(210,205,190,0.07);
+      animation: pj-warm 3.4s steps(1, end) 0.4s forwards;
+      transition: transform 1s cubic-bezier(0.35, 0, 0.65, 1), filter 0.8s ease-in;
     }
-    .hb-ecg { width: min(560px, 82vw); height: auto; overflow: visible; position: relative; }
-    .hb-ecg path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
-    .hb-trace {
-      stroke: #b0101c; stroke-width: 2.2;
-      filter: drop-shadow(0 0 5px rgba(210,20,35,0.85));
-      stroke-dasharray: 0.3 2; stroke-dashoffset: 0.3;
-      animation: hb-sweep 1.4s linear infinite; animation-delay: -0.37s;  /* puts the spike on the pulse */
+    .pj-light {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 75% 70% at 50% 48%, rgba(226,220,204,0.42) 0%, rgba(196,190,174,0.3) 40%, rgba(140,136,124,0.17) 75%, rgba(70,68,62,0.08) 100%);
+      box-shadow: inset 0 0 60px 18px rgba(0,0,0,0.55);
+      animation: pj-idle 0.16s steps(2, end) infinite, pj-weave 0.24s steps(3, end) infinite;
     }
-    .hb-ghost { stroke: rgba(120,10,20,0.16); stroke-width: 1.4; }
-    .hb-flat {
-      stroke: #b0101c; stroke-width: 2.2; opacity: 0;
-      filter: drop-shadow(0 0 5px rgba(210,20,35,0.85));
-      stroke-dasharray: 1 1; stroke-dashoffset: 1;
+    .pj-grain {
+      position: absolute; inset: -50%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.7'/%3E%3C/svg%3E"); background-size: 160px 160px;
+      mix-blend-mode: overlay; opacity: 0.35;
+      animation: film-grain 0.4s steps(4) infinite;
     }
-    @keyframes hb-beat {
-      0%   { opacity: 0.1 }
-      6%   { opacity: 0.8 }
-      14%  { opacity: 0.3 }
-      21%  { opacity: 0.6 }
-      45%, 100% { opacity: 0.1 }
+    .pj-dust { position: absolute; width: 2px; height: 2px; border-radius: 50%; background: transparent; top: 0; left: 0;
+      box-shadow: 120px 80px 0 0 rgba(235,230,215,.5), 340px 210px 0 1px rgba(235,230,215,.35), 510px 60px 0 0 rgba(235,230,215,.4),
+                  60px 300px 0 0 rgba(235,230,215,.3), 430px 380px 0 1px rgba(20,20,20,.7), 250px 140px 0 0 rgba(20,20,20,.6);
+      animation: pj-dust 0.5s steps(1, end) infinite; }
+    .pj-scratch { position: absolute; top: 0; bottom: 0; left: 30%; width: 1px; background: rgba(235,230,215,0.35); opacity: 0; animation: film-scratch 5s linear infinite; }
+    .pj-flash {
+      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+      filter: grayscale(1) invert(1) contrast(1.9) brightness(0.9);
+      mix-blend-mode: screen; opacity: 0;
+      animation: pj-flash 9s steps(1, end) 3.9s infinite;
     }
-    @keyframes hb-sweep { from { stroke-dashoffset: 0.3 } to { stroke-dashoffset: -1 } }
+    .pj-play {
+      position: absolute; left: 50%; top: 50%; width: 0; height: 0;
+      border-left: 15px solid rgba(232,226,210,0.75); border-top: 9px solid transparent; border-bottom: 9px solid transparent;
+      transform: translate(-35%, -50%); opacity: 0;
+      filter: drop-shadow(0 0 6px rgba(232,226,210,0.35));
+      animation: pj-play 2.2s steps(1, end) 3.9s infinite;
+    }
+    /* lamp catching: on, off, half, on */
+    @keyframes pj-warm {
+      0% { opacity: 0 } 7% { opacity: .55 } 10% { opacity: 0 } 19% { opacity: .35 } 21% { opacity: .05 }
+      30% { opacity: .8 } 33% { opacity: .2 } 44% { opacity: .95 } 46% { opacity: .5 } 58% { opacity: 1 }
+      61% { opacity: .7 } 64%, 100% { opacity: 1 }
+    }
+    @keyframes pj-idle  { 0% { opacity: 1 } 50% { opacity: .9 } }
+    @keyframes pj-weave { 0% { transform: translate(0,0) } 33% { transform: translate(0.6px,-0.8px) } 66% { transform: translate(-0.5px,0.5px) } }
+    @keyframes pj-dust  {
+      0% { transform: translate(0,0) } 25% { transform: translate(90px,40px) } 50% { transform: translate(-30px,120px) }
+      75% { transform: translate(60px,-50px) }
+    }
+    @keyframes pj-flash { 0% { opacity: 0 } 1% { opacity: .8 } 1.6% { opacity: .25 } 2% { opacity: .7 } 2.6%, 100% { opacity: 0 } }
+    @keyframes pj-play  { 0% { opacity: .85 } 40% { opacity: .55 } 43% { opacity: .9 } 71% { opacity: .2 } 73% { opacity: .8 } }
 
-    /* clicked — it panics */
-    .intro-overlay.racing .hb-glow  { animation-duration: 0.46s; }
-    .intro-overlay.racing .hb-trace { animation-duration: 0.46s; animation-delay: -0.12s; }
-    /* then it stops */
-    .intro-overlay.flat .hb-glow  { animation: none; opacity: 0; transition: opacity 1.4s ease; }
-    .intro-overlay.flat .hb-trace,
-    .intro-overlay.flat .hb-ghost { opacity: 0; animation: none; transition: opacity 0.25s; }
-    .intro-overlay.flat .hb-flat  { opacity: 1; stroke-dashoffset: 0; transition: stroke-dashoffset 0.9s linear; }
-    .intro-overlay.hide .hb-flat  { opacity: 0; transition: opacity 1.6s ease; }
+    /* clicked — the light comes at you */
+    .intro-overlay.go .pj-frame { transform: scale(4); filter: brightness(3.2); }
+    .intro-overlay.go .pj-play  { animation: none; opacity: 0; }
+    .intro-overlay.go .pj-flash { animation: none; opacity: 0; }
 
     @media (prefers-reduced-motion: reduce) {
-      .hb-glow, .hb-trace { animation: none !important; }
-      .hb-glow { opacity: 0.45; }
-      .hb-trace { stroke-dasharray: none; }
-    }
-
-    @media (max-width: 700px) {
-      .layout { flex-direction: column; gap: 16px; }
-      .sidebar { width: 100%; position: static; }
-      .sb-avatar { width: 96px; }
+      .pj-frame { animation: none; opacity: 1; transition: none; }
+      .pj-light, .pj-grain, .pj-dust, .pj-scratch, .pj-flash { animation: none !important; }
+      .pj-play { animation: none; opacity: .8; }
+      .intro-overlay.go .pj-frame { transform: none; filter: none; }
     }
 
     body.princess-mode {
@@ -536,12 +550,14 @@
 </head>
 <body class="intro-active">
   <div class="intro-overlay" id="intro" role="button" aria-label="enter">
-    <div class="hb-glow"></div>
-    <svg class="hb-ecg" viewBox="0 0 600 120" aria-hidden="true">
-      <path class="hb-ghost" d="M0 70 H215 L228 70 L238 56 L248 70 L262 70 L272 14 L286 108 L298 70 L320 70 L336 58 L352 70 H600"/>
-      <path class="hb-trace" pathLength="1" d="M0 70 H215 L228 70 L238 56 L248 70 L262 70 L272 14 L286 108 L298 70 L320 70 L336 58 L352 70 H600"/>
-      <path class="hb-flat" pathLength="1" d="M0 70 H600"/>
-    </svg>
+    <div class="pj-frame" aria-hidden="true">
+      <div class="pj-light"></div>
+      <img class="pj-flash" src="images/goat_mask.jpg" alt="" />
+      <div class="pj-grain"></div>
+      <div class="pj-dust"></div>
+      <div class="pj-scratch"></div>
+      <div class="pj-play"></div>
+    </div>
   </div>
 
   <div id="her-glow" aria-hidden="true"></div>
@@ -1320,55 +1336,24 @@ else bootLanyard()
   let dismissed = false
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-  // low thump per beat, made on the spot (only allowed after the click anyway)
-  let actx = null
-  const thump = (at, loud) => {
-    if (!actx) return
-    const o = actx.createOscillator(), g = actx.createGain()
-    o.type = 'sine'
-    o.frequency.setValueAtTime(70, at)
-    o.frequency.exponentialRampToValueAtTime(38, at + 0.16)
-    g.gain.setValueAtTime(0.0001, at)
-    g.gain.exponentialRampToValueAtTime(loud, at + 0.012)
-    g.gain.exponentialRampToValueAtTime(0.0001, at + 0.2)
-    o.connect(g).connect(actx.destination)
-    o.start(at); o.stop(at + 0.22)
-  }
-
   const dismiss = () => {
     if (dismissed) return
     dismissed = true
 
-    // start the song inside the click so the browser allows it, keep it quiet til the heart stops
+    // msuciccccc — start it inside the click so the browser lets it play
     const audioEl = window.__playerAudio
-    if (audioEl) { audioEl.muted = true; audioEl.play().catch(() => {}) }
+    if (audioEl) audioEl.play().catch(() => {})
 
     const reveal = () => {
       ov.classList.add('hide')
       document.body.classList.remove('intro-active')
-      if (audioEl) {
-        audioEl.currentTime = 0
-        audioEl.muted = false
-        audioEl.play().catch(() => {})
-      }
       setTimeout(() => { ov.remove() }, 2700)
     }
     if (reduced) { reveal(); return }
 
-    // panic: beats speed up
-    ov.classList.add('racing')
-    try {
-      actx = new (window.AudioContext || window.webkitAudioContext)()
-      const t0 = actx.currentTime + 0.02
-      for (let i = 0; i < 4; i++) {
-        thump(t0 + i * 0.46, 0.5)          // lub
-        thump(t0 + i * 0.46 + 0.1, 0.3)    // dub
-      }
-    } catch (e) {}
-
-    // then it stops
-    setTimeout(() => ov.classList.add('flat'), 1840)
-    setTimeout(() => { reveal(); if (actx) actx.close().catch(() => {}) }, 3100)
+    // light swells toward you, then the room comes up
+    ov.classList.add('go')
+    setTimeout(reveal, 650)
   }
   // no auto dismiss, u gotta click
   ov.addEventListener('click', dismiss, { once: true })
