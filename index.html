@@ -321,21 +321,6 @@
       84% { filter: contrast(1.05) brightness(1.02) }
     }
 
-    /* blood-red where it used to be grey */
-    body:not(.princess-mode) .trk-item.active { background: rgba(140, 20, 32, 0.07); }
-    body:not(.princess-mode) .trk-item.active::before,
-    body:not(.princess-mode) .bars span,
-    body:not(.princess-mode) .dot.active,
-    body:not(.princess-mode) .r-fill { background: var(--red); box-shadow: 0 0 8px var(--red-glow); }
-    body:not(.princess-mode) .trk-item:hover { background: rgba(140, 20, 32, 0.045); }
-    body:not(.princess-mode) input[type="range"]::-webkit-slider-thumb { background: #c9b8b9; box-shadow: 0 0 6px var(--red-glow); }
-    body:not(.princess-mode) input[type="range"]::-moz-range-thumb { background: #c9b8b9; box-shadow: 0 0 6px var(--red-glow); }
-    body:not(.princess-mode) :is(.section-lbl, .queue-lbl, .vol-lbl, .gal-num) { color: #6e1a22; }
-    body:not(.princess-mode) .p-label:hover { text-shadow: 0 0 14px rgba(170, 20, 34, 0.55); color: #e6d2d3; }
-    body:not(.princess-mode) .c-btn:hover, body:not(.princess-mode) .arr-btn:hover { color: var(--red-hi); filter: drop-shadow(0 0 5px var(--red-glow)); }
-    body:not(.princess-mode) .link-btn:hover { border-color: rgba(150,14,28,0.55); color: #d9c3c4; box-shadow: 0 0 14px rgba(150,14,28,0.25); }
-    body:not(.princess-mode) .panel:hover { border-color: rgba(150, 14, 28, 0.22); }
-
     /* gallery = evidence: a scope's corner brackets sit over every picture */
     body:not(.princess-mode) .gal-img-w::after {
       content: ''; position: absolute; inset: 14px; pointer-events: none; z-index: 3; opacity: 0.55; transition: opacity 0.6s ease, inset 0.6s ease;
