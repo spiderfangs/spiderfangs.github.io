@@ -182,6 +182,10 @@
     .gal-img-w:has(img.fit-contain) { display: flex; align-items: center; justify-content: center; }
     .gal-img-w img.fit-contain { -o-object-fit: contain; object-fit: contain; height: auto; max-height: 420px; }
     .gal-img-w img.fade { opacity: 0; }
+    /* dark side crossfade: the old picture dissolves over the new one */
+    .gal-img-w img.g-ghost { position: absolute; inset: 0; width: 100%; height: 100%; max-height: none; object-fit: cover; z-index: 1; transition: opacity 0.8s ease; animation: none; filter: grayscale(1) contrast(1.45) brightness(0.82); }
+    .gal-img-w img.g-ghost.fit { object-fit: contain; }
+    .gal-img-w img.g-ghost.out { opacity: 0 !important; }
     .gal-img-w:hover img { opacity: 0.95; filter: grayscale(0.7); }
     .gal-ph { width: 100%; min-height: 260px; display: flex; align-items: center; justify-content: center; color: var(--border-2); font-size: 40px; }
     .gal-side { width: 132px; flex-shrink: 0; padding: 14px; display: flex; flex-direction: column; justify-content: space-between; }
@@ -261,8 +265,6 @@
       z-index: 10000;
       display: flex; align-items: center; justify-content: center;
       background: rgba(6, 6, 6, 0.985);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
       cursor: pointer;
       /* transitions only — no keyframes. a filled animation pins opacity
          and killing it snaps instead of fading */
@@ -275,9 +277,7 @@
     .intro-overlay.hide {
       opacity: 0;
       pointer-events: none;
-      backdrop-filter: blur(0px);
-      -webkit-backdrop-filter: blur(0px);
-      transition: opacity 2.6s ease, backdrop-filter 2.6s ease;
+      transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
     /* crosshair — a dim red reticle searching the dark. click and it takes the shot */
     .intro-overlay { background: #000; cursor: none; }
@@ -296,11 +296,15 @@
     /* missed — the scope kicks */
     .ch.kick svg { animation: ch-kick 0.32s ease-out; }
     @keyframes ch-kick { 0% { transform: translate(0, 0) } 25% { transform: translate(3px, -12px) rotate(-3deg) } 100% { transform: translate(0, 0) } }
-    .intro-overlay.shot .sk { opacity: 0 !important; }
+    .intro-overlay.shot .sk { opacity: 0 !important; transition: opacity 0.4s ease, filter 0.4s ease; }
     /* clicked — tightens on the mark, then the shot */
     .intro-overlay.lock .ch svg { transform: scale(0.72); }
     .intro-overlay.lock .ch .r { stroke: rgba(210, 30, 44, 0.95); }
-    .intro-overlay.shot .ch { opacity: 0; transition: none; }
+    .intro-overlay.shot .ch { opacity: 0; transition: opacity 0.3s ease; }
+    /* the page rises out of the dark as it lifts */
+    body.entering .layout { animation: enterRise 1.6s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+    @keyframes enterRise { from { opacity: 0; transform: translateY(8px) scale(0.995); } to { opacity: 1; transform: none; } }
+    @media (prefers-reduced-motion: reduce) { body.entering .layout { animation: none; } }
     @media (prefers-reduced-motion: reduce) {
       .ch svg { transition: none; }
     }
@@ -318,16 +322,6 @@
     /* no piano on this side */
     body:not(.princess-mode) .piano-bar { display: none; }
 
-    /* the lambs keep their red */
-    body:not(.princess-mode) .sb-avatar img { filter: contrast(1.05); opacity: 0.92; animation: film-flicker-c 4.5s steps(1) infinite; }
-    body:not(.princess-mode) .sb-avatar:hover img { filter: contrast(1.08); opacity: 1; }
-    body:not(.princess-mode) .sb-avatar:hover { border-color: rgba(150,14,28,0.5); box-shadow: 0 0 0 1px rgba(150,14,28,0.18), 0 0 26px rgba(150,14,28,0.22); }
-    @keyframes film-flicker-c {
-      0%, 100% { filter: contrast(1.05) brightness(1) } 31% { filter: contrast(1.05) brightness(0.9) }
-      33% { filter: contrast(1.05) brightness(1.04) } 58% { filter: contrast(1.05) brightness(0.94) }
-      60% { filter: contrast(1.05) brightness(1) } 83% { filter: contrast(1.05) brightness(0.88) }
-      84% { filter: contrast(1.05) brightness(1.02) }
-    }
 
 
     /* ═══ dark side, round two: grime over clean. still all :not(.princess-mode) ═══ */
@@ -674,7 +668,7 @@ const SITE = {
   },
   bottomMedia: {
     src:   "images/bottom.mp4",   // autodetec
-    label: "vespers",
+    label: "footage",
   },
 }
 
@@ -1023,11 +1017,40 @@ function initGallery() {
     gdots.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur))
   }
 
+  // dark side: load the next picture first, then dissolve the old one over it — no dip to black
+  const XFADE = 800
+  function crossTo(next) {
+    pending = next
+    fadeTimer = true
+    const pre = new Image()
+    pre.src = items[next].image
+    const go = () => {
+      const target = pending === null ? next : pending
+      const ghost = img.cloneNode()
+      ghost.removeAttribute('id')
+      ghost.className = 'g-ghost' + (img.classList.contains('fit-contain') ? ' fit' : '')
+      img.parentElement.appendChild(ghost)
+      gnum.classList.add('fade'); gcap.classList.add('fade')
+      render(target)
+      requestAnimationFrame(() => requestAnimationFrame(() => ghost.classList.add('out')))
+      setTimeout(() => { gnum.classList.remove('fade'); gcap.classList.remove('fade') }, 320)
+      fadeTimer = setTimeout(() => {
+        ghost.remove()
+        fadeTimer = null
+        const again = pending; pending = null
+        if (again !== null && again !== cur) goTo(again, true)
+      }, XFADE)
+      pending = null
+    }
+    ;(pre.decode ? pre.decode() : Promise.resolve()).then(go, go)
+  }
+
   function goTo(idx, fromAuto) {
     const next = norm(idx)
     if (!fromAuto) restartAuto()          // clicking resets the clock
     if (fadeTimer) { pending = next; return }  // mid fade — retarget, dont drop it
     if (next === cur) return
+    if (!document.body.classList.contains('princess-mode')) { crossTo(next); return }
     pending = next
     setFade(true)
     fadeTimer = setTimeout(() => {
@@ -1054,9 +1077,11 @@ function initGallery() {
       // kill anything mid fade
       clearTimeout(fadeTimer); fadeTimer = null; pending = null
       setFade(false)
+      img.parentElement.querySelectorAll('.g-ghost').forEach(g => g.remove())
       items = newItems; cur = 0
       img.style.display = ''
       img.src = items[0].image
+      img.classList.toggle('fit-contain', items[0].fit === 'contain')
       gnum.textContent = items[0].number
       gcap.textContent = items[0].caption
       gdots.innerHTML = items.map((_, i) =>
@@ -1454,7 +1479,8 @@ else bootLanyard()
     const reveal = () => {
       ov.classList.add('hide')
       document.body.classList.remove('intro-active')
-      setTimeout(() => { ov.remove() }, 2700)
+      document.body.classList.add('entering')
+      setTimeout(() => { ov.remove(); document.body.classList.remove('entering') }, 1700)
     }
     aiming = false
     if (reduced) { reveal(); return }
@@ -1463,7 +1489,9 @@ else bootLanyard()
     ch.style.transition = 'transform 0.18s ease-out'
     ch.style.transform = `translate(${x}px, ${y}px)`
     ov.classList.add('lock')
-    setTimeout(() => { ov.classList.add('shot'); reveal() }, 420)
+    // tighten, let the skull and scope dissolve, then lift the dark
+    setTimeout(() => ov.classList.add('shot'), 260)
+    setTimeout(reveal, 260 + 280)
   }
 
   // a click (or tap) is a shot where you clicked. only a hit on the skull gets you in
